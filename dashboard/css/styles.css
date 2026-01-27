@@ -742,6 +742,29 @@ body {
     text-decoration: underline;
 }
 
+/* Range Examples */
+.range-examples {
+    margin-top: 0.75rem;
+}
+
+.range-example {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.range-badge {
+    background: #FF9800;
+    color: white;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: monospace;
+}
+
 /* Not Available Styling */
 .not-available {
     color: #999 !important;

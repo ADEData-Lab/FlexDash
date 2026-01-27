@@ -73,13 +73,37 @@ All published values are rounded to reduce precision:
 - Counts: nearest 10
 - Percentages: nearest 1%
 
-### 5.4 Suppression Strategy
+### 5.4 Range Estimates
+
+When a cell has fewer than 3 contributors (k < 3), instead of publishing exact values,
+we publish **range estimates** using predefined buckets:
+
+| Bucket | Range |
+|--------|-------|
+| <10 MW | 0 - 10 MW |
+| 10-50 MW | 10 - 50 MW |
+| 50-100 MW | 50 - 100 MW |
+| 100-250 MW | 100 - 250 MW |
+| 250-500 MW | 250 - 500 MW |
+| 0.5-1 GW | 500 - 1,000 MW |
+| 1-2.5 GW | 1,000 - 2,500 MW |
+| 2.5-5 GW | 2,500 - 5,000 MW |
+| 5-10 GW | 5,000 - 10,000 MW |
+| >10 GW | 10,000+ MW |
+
+This approach:
+- Prevents exact values from being derived through differencing attacks
+- Still provides useful magnitude information for analysis
+- Follows statistical agency best practices (ONS, Eurostat)
+- Maintains k=3 threshold for point estimates
+
+### 5.5 Suppression Strategy
 
 When a cell fails disclosure checks:
 
-1. **Primary action**: Suppress the cell (show as "-" or "N/A")
-2. **Secondary action**: If suppression creates inference risk, use illustrative data
-3. **Illustrative data**: Clearly labelled estimates based on sector averages
+1. **Primary action**: Publish range estimate (see 5.4)
+2. **Secondary action**: If range would still reveal information, suppress entirely (show as "-")
+3. **Tertiary action**: If suppression creates inference risk, aggregate to higher level
 
 ## 6. Anonymisation Pipeline
 

@@ -7,6 +7,27 @@
  * Generated: 2026-01-27
  */
 
+/**
+ * Convert a value to a disclosure-safe range bucket
+ * Used for cells with k < 3 contributors
+ */
+function getDisclosureRange(valueMW) {
+    if (valueMW === 0) return { label: '0 MW', min: 0, max: 0, midpoint: 0 };
+    if (valueMW < 10) return { label: '<10 MW', min: 0, max: 10, midpoint: 5 };
+    if (valueMW < 50) return { label: '10-50 MW', min: 10, max: 50, midpoint: 30 };
+    if (valueMW < 100) return { label: '50-100 MW', min: 50, max: 100, midpoint: 75 };
+    if (valueMW < 250) return { label: '100-250 MW', min: 100, max: 250, midpoint: 175 };
+    if (valueMW < 500) return { label: '250-500 MW', min: 250, max: 500, midpoint: 375 };
+    if (valueMW < 1000) return { label: '0.5-1 GW', min: 500, max: 1000, midpoint: 750 };
+    if (valueMW < 2500) return { label: '1-2.5 GW', min: 1000, max: 2500, midpoint: 1750 };
+    if (valueMW < 5000) return { label: '2.5-5 GW', min: 2500, max: 5000, midpoint: 3750 };
+    if (valueMW < 10000) return { label: '5-10 GW', min: 5000, max: 10000, midpoint: 7500 };
+    return { label: '>10 GW', min: 10000, max: 15000, midpoint: 12500 };
+}
+
+// Export for use
+window.getDisclosureRange = getDisclosureRange;
+
 const DASHBOARD_DATA = {
   "generated_at": "2026-01-27T15:34:57.264480",
   "version": "1.0.0",
@@ -45,21 +66,31 @@ const DASHBOARD_DATA = {
     {
       "asset_class": "battery_storage",
       "capacity_mw": 100,
-      "capacity_mw_illustrative": false,
+      "capacity_mw_illustrative": true,
+      "capacity_range": "50-100 MW",
+      "capacity_range_min": 50,
+      "capacity_range_max": 100,
+      "k": 2,
       "count": 19530,
       "count_illustrative": false
     },
     {
       "asset_class": "cold_storage",
       "capacity_mw": 40,
-      "capacity_mw_illustrative": true,
+      "capacity_mw_illustrative": false,
+      "capacity_range": null,
+      "k": 4,
       "count": 20,
-      "count_illustrative": true
+      "count_illustrative": false
     },
     {
       "asset_class": "commercial_battery",
       "capacity_mw": 80,
       "capacity_mw_illustrative": true,
+      "capacity_range": "50-100 MW",
+      "capacity_range_min": 50,
+      "capacity_range_max": 100,
+      "k": 1,
       "count": 10,
       "count_illustrative": true
     },
@@ -67,6 +98,8 @@ const DASHBOARD_DATA = {
       "asset_class": "ev_charger",
       "capacity_mw": 4450,
       "capacity_mw_illustrative": false,
+      "capacity_range": null,
+      "k": 3,
       "count": 635420,
       "count_illustrative": false
     },
@@ -74,6 +107,10 @@ const DASHBOARD_DATA = {
       "asset_class": "heat_pump",
       "capacity_mw": 0,
       "capacity_mw_illustrative": true,
+      "capacity_range": "0 MW",
+      "capacity_range_min": 0,
+      "capacity_range_max": 0,
+      "k": 1,
       "count": 80,
       "count_illustrative": true
     },
@@ -81,6 +118,10 @@ const DASHBOARD_DATA = {
       "asset_class": "ic_mixed",
       "capacity_mw": 8810,
       "capacity_mw_illustrative": true,
+      "capacity_range": "5-10 GW",
+      "capacity_range_min": 5000,
+      "capacity_range_max": 10000,
+      "k": 2,
       "count": 270,
       "count_illustrative": true
     },
@@ -88,6 +129,10 @@ const DASHBOARD_DATA = {
       "asset_class": "manufacturing",
       "capacity_mw": 70,
       "capacity_mw_illustrative": true,
+      "capacity_range": "50-100 MW",
+      "capacity_range_min": 50,
+      "capacity_range_max": 100,
+      "k": 1,
       "count": 100,
       "count_illustrative": true
     },
@@ -95,6 +140,10 @@ const DASHBOARD_DATA = {
       "asset_class": "other",
       "capacity_mw": 180,
       "capacity_mw_illustrative": true,
+      "capacity_range": "100-250 MW",
+      "capacity_range_min": 100,
+      "capacity_range_max": 250,
+      "k": 1,
       "count": 36400,
       "count_illustrative": true
     },
@@ -102,6 +151,10 @@ const DASHBOARD_DATA = {
       "asset_class": "water_treatment",
       "capacity_mw": 30,
       "capacity_mw_illustrative": true,
+      "capacity_range": "10-50 MW",
+      "capacity_range_min": 10,
+      "capacity_range_max": 50,
+      "k": 1,
       "count": 90,
       "count_illustrative": true
     }

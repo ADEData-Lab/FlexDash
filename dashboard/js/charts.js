@@ -143,7 +143,7 @@ function createSectorChart(data) {
 }
 
 /**
- * Create asset class horizontal bar chart
+ * Create asset class horizontal bar chart with range support
  */
 function createAssetChart(data) {
     const ctx = document.getElementById('asset-chart');
@@ -151,12 +151,33 @@ function createAssetChart(data) {
 
     const assetData = data.asset_breakdown || [];
 
-    // Sort by capacity descending
-    const sorted = [...assetData].sort((a, b) => b.capacity_mw - a.capacity_mw);
+    // Sort by capacity descending (use midpoint for illustrative)
+    const sorted = [...assetData].sort((a, b) => {
+        const aVal = a.capacity_mw_illustrative && a.capacity_range_max ?
+            (a.capacity_range_min + a.capacity_range_max) / 2 : a.capacity_mw;
+        const bVal = b.capacity_mw_illustrative && b.capacity_range_max ?
+            (b.capacity_range_min + b.capacity_range_max) / 2 : b.capacity_mw;
+        return bVal - aVal;
+    });
 
-    const labels = sorted.map(d => formatLabelLocal(d.asset_class));
-    const values = sorted.map(d => d.capacity_mw);
+    // For illustrative data, use midpoint of range for display
+    const labels = sorted.map(d => {
+        let label = formatLabelLocal(d.asset_class);
+        if (d.capacity_mw_illustrative && d.capacity_range) {
+            label += ` [${d.capacity_range}]`;
+        }
+        return label;
+    });
+
+    const values = sorted.map(d => {
+        if (d.capacity_mw_illustrative && d.capacity_range_max) {
+            return (d.capacity_range_min + d.capacity_range_max) / 2;
+        }
+        return d.capacity_mw;
+    });
+
     const illustrativeFlags = sorted.map(d => d.capacity_mw_illustrative);
+    const ranges = sorted.map(d => d.capacity_range);
 
     // Color bars based on illustrative status
     const colors = sorted.map((d, i) =>
@@ -186,9 +207,12 @@ function createAssetChart(data) {
                     callbacks: {
                         label: function(context) {
                             const isIllustrative = illustrativeFlags[context.dataIndex];
-                            let label = `${new Intl.NumberFormat('en-GB').format(context.parsed.x)} MW`;
-                            if (isIllustrative) label += ' [Illustrative]';
-                            return label;
+                            const range = ranges[context.dataIndex];
+
+                            if (isIllustrative && range) {
+                                return `Range: ${range} (k<3 contributors)`;
+                            }
+                            return `${new Intl.NumberFormat('en-GB').format(context.parsed.x)} MW`;
                         }
                     }
                 }
@@ -212,7 +236,7 @@ function createAssetChart(data) {
     const hasIllustrative = illustrativeFlags.some(f => f);
     const noteEl = document.getElementById('asset-note');
     if (noteEl && hasIllustrative) {
-        noteEl.textContent = 'Orange bars indicate illustrative values.';
+        noteEl.textContent = 'Orange bars show range estimates (k<3 contributors). Bar height shows range midpoint.';
     }
 
     if (!window.DashboardState.charts.overview) {
