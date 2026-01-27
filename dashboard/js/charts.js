@@ -84,7 +84,7 @@ function createSectorChart(data) {
     if (!ctx) return;
 
     const sectorData = data.sector_breakdown || [];
-    const labels = sectorData.map(d => formatLabel(d.sector));
+    const labels = sectorData.map(d => formatLabelLocal(d.sector));
     const values = sectorData.map(d => d.capacity_mw);
     const illustrativeFlags = sectorData.map(d => d.capacity_mw_illustrative);
 
@@ -154,7 +154,7 @@ function createAssetChart(data) {
     // Sort by capacity descending
     const sorted = [...assetData].sort((a, b) => b.capacity_mw - a.capacity_mw);
 
-    const labels = sorted.map(d => formatLabel(d.asset_class));
+    const labels = sorted.map(d => formatLabelLocal(d.asset_class));
     const values = sorted.map(d => d.capacity_mw);
     const illustrativeFlags = sorted.map(d => d.capacity_mw_illustrative);
 
@@ -246,7 +246,7 @@ function createDomesticAssetChart(data) {
     }
 
     const sorted = [...filtered].sort((a, b) => b.capacity_mw - a.capacity_mw);
-    const labels = sorted.map(d => formatLabel(d.asset_class));
+    const labels = sorted.map(d => formatLabelLocal(d.asset_class));
     const values = sorted.map(d => d.capacity_mw);
     const colors = sorted.map((d, i) =>
         d.capacity_mw_illustrative ? CHART_COLORS.illustrative : CHART_COLORS.palette[i % CHART_COLORS.palette.length]
@@ -315,7 +315,7 @@ function createICAssetChart(data) {
     }
 
     const sorted = [...filtered].sort((a, b) => b.capacity_mw - a.capacity_mw);
-    const labels = sorted.map(d => formatLabel(d.asset_class));
+    const labels = sorted.map(d => formatLabelLocal(d.asset_class));
     const values = sorted.map(d => d.capacity_mw);
     const colors = sorted.map((d, i) =>
         d.capacity_mw_illustrative ? CHART_COLORS.illustrative : CHART_COLORS.palette[i % CHART_COLORS.palette.length]
@@ -360,10 +360,9 @@ function createICAssetChart(data) {
 }
 
 /**
- * Format label helper (use global if available)
+ * Format label helper
  */
-function formatLabel(label) {
-    if (window.formatLabel) return window.formatLabel(label);
+function formatLabelLocal(label) {
     if (!label) return 'Unknown';
     return String(label)
         .replace(/_/g, ' ')
