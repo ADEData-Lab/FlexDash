@@ -32,6 +32,9 @@ const CONFIG = {
 async function initDashboard() {
     console.log('Initializing FlexDash...');
 
+    // Set up theme
+    setupTheme();
+
     // Set up navigation
     setupNavigation();
 
@@ -45,6 +48,57 @@ async function initDashboard() {
     }
 
     console.log('FlexDash initialized');
+}
+
+/**
+ * Set up theme selector and load saved preference
+ */
+function setupTheme() {
+    const themeSelect = document.getElementById('theme-select');
+    if (!themeSelect) return;
+
+    // Load saved theme or default to 'energy-flow'
+    const savedTheme = localStorage.getItem('flexdash-theme') || 'energy-flow';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeSelect.value = savedTheme;
+
+    // Handle theme changes
+    themeSelect.addEventListener('change', (e) => {
+        const theme = e.target.value;
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('flexdash-theme', theme);
+
+        // Reinitialize charts with new colors
+        if (DashboardState.data) {
+            updateChartColors();
+        }
+    });
+}
+
+/**
+ * Update chart colors when theme changes
+ */
+function updateChartColors() {
+    // Get computed styles for current theme
+    const styles = getComputedStyle(document.documentElement);
+    const domesticColor = styles.getPropertyValue('--chart-domestic').trim() || '#45c3d3';
+    const icColor = styles.getPropertyValue('--chart-ic').trim() || '#6eb43f';
+    const illustrativeColor = styles.getPropertyValue('--chart-illustrative').trim() || '#eb8800';
+
+    // Update CHART_COLORS
+    if (window.CHART_COLORS) {
+        window.CHART_COLORS.domestic = domesticColor;
+        window.CHART_COLORS.ic = icColor;
+        window.CHART_COLORS.illustrative = illustrativeColor;
+        window.CHART_COLORS.primary = domesticColor;
+        window.CHART_COLORS.secondary = icColor;
+        window.CHART_COLORS.tertiary = illustrativeColor;
+    }
+
+    // Reinitialize charts
+    if (typeof initializeCharts === 'function') {
+        initializeCharts();
+    }
 }
 
 /**
@@ -68,7 +122,7 @@ function setupNavigation() {
 
     // Check URL hash on load
     const hash = window.location.hash.replace('#', '');
-    if (hash && ['overview', 'domestic', 'ic', 'methodology'].includes(hash)) {
+    if (hash && ['overview', 'domestic', 'ic', 'projections', 'methodology'].includes(hash)) {
         navigateToPage(hash, false);
     }
 }
@@ -207,32 +261,38 @@ function updateUI() {
     updateElement('total-available', formatNumber(data.metrics.total_available_mw));
     updateElement('contributor-count', data.metrics.contributor_count);
 
-    // Note: total-delivered, delivery-factor are marked N/A in HTML (Phase 1 data limitation)
-    // Only update if we have actual delivered data in future phases
+    // Methodology v7: Update delivered and delivery factor
     if (data.metrics.total_delivered_mw > 0) {
         updateElement('total-delivered', formatNumber(data.metrics.total_delivered_mw));
+        const deliveredEl = document.getElementById('total-delivered');
+        if (deliveredEl) deliveredEl.classList.remove('not-available');
+    }
+    if (data.metrics.delivery_factor_pct > 0) {
         updateElement('delivery-factor', `${formatNumber(data.metrics.delivery_factor_pct)}%`);
+        const factorEl = document.getElementById('delivery-factor');
+        if (factorEl) factorEl.classList.remove('not-available');
     }
 
-    // Update sector metrics (available only - delivered marked N/A)
+    // Update sector metrics
     updateElement('domestic-available', formatNumber(data.metrics.domestic?.available_mw));
     updateElement('ic-available', formatNumber(data.metrics.ic?.available_mw));
 
-    // Only update delivered if we have data
     if (data.metrics.domestic?.delivered_mw > 0) {
         updateElement('domestic-delivered', formatNumber(data.metrics.domestic?.delivered_mw));
+        const domDeliveredEl = document.getElementById('domestic-delivered');
+        if (domDeliveredEl) domDeliveredEl.classList.remove('not-available');
     }
     if (data.metrics.ic?.delivered_mw > 0) {
         updateElement('ic-delivered', formatNumber(data.metrics.ic?.delivered_mw));
+        const icDeliveredEl = document.getElementById('ic-delivered');
+        if (icDeliveredEl) icDeliveredEl.classList.remove('not-available');
     }
 
     // Update domestic page
     updateElement('domestic-total-mw', formatNumber(data.metrics.domestic?.available_mw));
-    // domestic-delivery-pct is marked N/A in HTML
 
     // Update I&C page
     updateElement('ic-total-mw', formatNumber(data.metrics.ic?.available_mw));
-    // ic-delivery-pct is marked N/A in HTML
 
     // Update narratives
     if (data.narratives) {
@@ -250,6 +310,71 @@ function updateUI() {
 
     // Update last updated
     updateElement('last-updated', formatDate(data.generated_at));
+
+    // Methodology v7: Update new metrics
+    updateV7Metrics(data);
+}
+
+/**
+ * Update Methodology v7 specific metrics
+ */
+function updateV7Metrics(data) {
+    // Energy metrics (GWh)
+    if (data.energy_metrics) {
+        updateElement('total-available-gwh', formatNumber(data.energy_metrics.total.available_gwh));
+        updateElement('total-delivered-gwh', formatNumber(data.energy_metrics.total.delivered_gwh));
+        updateElement('explicit-gwh', formatNumber(data.energy_metrics.explicit.delivered_gwh));
+        updateElement('implicit-gwh', formatNumber(data.energy_metrics.implicit.delivered_gwh));
+    }
+
+    // Utilisation rate
+    if (data.utilisation) {
+        updateElement('utilisation-rate', `~${data.utilisation.overall_rate_pct}%`);
+        updateElement('utilisation-note', data.utilisation.overall_rate_note);
+    }
+
+    // Directional breakdown
+    if (data.directional_breakdown) {
+        updateElement('turn-up-gw', (data.directional_breakdown.turn_up.capacity_mw / 1000).toFixed(1));
+        updateElement('turn-down-gw', (data.directional_breakdown.turn_down.capacity_mw / 1000).toFixed(1));
+        updateElement('asymmetry-note', data.directional_breakdown.asymmetry_explanation);
+    }
+
+    // Flexibility type breakdown
+    if (data.flexibility_type_breakdown) {
+        updateElement('explicit-gw', (data.flexibility_type_breakdown.explicit.capacity_mw / 1000).toFixed(1));
+        updateElement('implicit-gw', (data.flexibility_type_breakdown.implicit.capacity_mw / 1000).toFixed(1));
+    }
+
+    // Latent potential
+    if (data.latent_potential) {
+        updateElement('latent-total-gw', data.latent_potential.total_gw.toFixed(1));
+    }
+
+    // Future projections
+    if (data.future_potential) {
+        updateElement('future-2030-gw', data.future_potential['2030'].central_gw);
+        updateElement('future-2030-range', `${data.future_potential['2030'].range_min_gw}-${data.future_potential['2030'].range_max_gw}`);
+        updateElement('future-2050-gw', data.future_potential['2050'].central_gw);
+        updateElement('future-2050-range', `${data.future_potential['2050'].range_min_gw}-${data.future_potential['2050'].range_max_gw}`);
+
+        // Update progress bar to 2030 target
+        const currentGW = data.metrics.total_available_mw / 1000;
+        const target2030 = data.future_potential['2030'].central_gw;
+        const progressPct = Math.min((currentGW / target2030) * 100, 100).toFixed(0);
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+            progressBar.style.width = `${progressPct}%`;
+            const label = progressBar.querySelector('.progress-label');
+            if (label) label.textContent = `${progressPct}%`;
+        }
+        const progressContext = document.querySelector('.progress-context');
+        if (progressContext) {
+            const spans = progressContext.querySelectorAll('span');
+            if (spans[0]) spans[0].textContent = `${currentGW.toFixed(1)} GW observed`;
+            if (spans[1]) spans[1].textContent = `${target2030} GW target (2030)`;
+        }
+    }
 }
 
 /**
@@ -314,3 +439,6 @@ document.addEventListener('DOMContentLoaded', initDashboard);
 window.DashboardState = DashboardState;
 window.formatNumber = formatNumber;
 window.formatLabel = formatLabel;
+window.updateV7Metrics = updateV7Metrics;
+window.setupTheme = setupTheme;
+window.updateChartColors = updateChartColors;

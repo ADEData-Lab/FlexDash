@@ -4,18 +4,21 @@
  * Handles Chart.js visualization creation and updates
  */
 
-// Chart color palette
+// Chart color palette - uses ADE:Demand brand colors
+// These can be updated dynamically when theme changes
 const CHART_COLORS = {
-    primary: '#2E86AB',
-    secondary: '#A23B72',
-    tertiary: '#F18F01',
-    success: '#4CAF50',
-    domestic: '#2E86AB',
-    ic: '#A23B72',
-    illustrative: '#FF9800',
+    primary: '#45c3d3',      // Teal
+    secondary: '#6eb43f',    // Green
+    tertiary: '#eb8800',     // Orange
+    success: '#6eb43f',      // Green
+    warning: '#eb8800',      // Orange
+    danger: '#c41230',       // Crimson
+    domestic: '#45c3d3',     // Teal
+    ic: '#6eb43f',           // Green
+    illustrative: '#eb8800', // Orange
     palette: [
-        '#2E86AB', '#A23B72', '#F18F01', '#4CAF50',
-        '#9C27B0', '#00BCD4', '#FF5722', '#607D8B'
+        '#45c3d3', '#6eb43f', '#eb8800', '#c41230',
+        '#58585a', '#7dd3e0', '#8dc761', '#f5a623'
     ]
 };
 
@@ -74,6 +77,13 @@ function initializeCharts() {
     createAssetChart(data);
     createDomesticAssetChart(data);
     createICAssetChart(data);
+
+    // Methodology v7 charts
+    createDirectionalChart(data);
+    createFlexTypeChart(data);
+    createEnergyBreakdownChart(data);
+    createLatentPotentialChart(data);
+    createFutureTimelineChart(data);
 }
 
 /**
@@ -91,13 +101,17 @@ function createSectorChart(data) {
     // Check if any values are illustrative
     const hasIllustrative = illustrativeFlags.some(f => f);
 
+    // Get theme colors
+    const domesticColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-domestic').trim() || CHART_COLORS.domestic;
+    const icColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-ic').trim() || CHART_COLORS.ic;
+
     const chart = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
                 data: values,
-                backgroundColor: [CHART_COLORS.domestic, CHART_COLORS.ic],
+                backgroundColor: [domesticColor, icColor],
                 borderColor: '#ffffff',
                 borderWidth: 3,
                 hoverOffset: 10
@@ -500,6 +514,427 @@ function formatLabelLocal(label) {
         .replace(/\b\w/g, l => l.toUpperCase());
 }
 
+/**
+ * Methodology v7: Turn-up vs Turn-down Chart
+ * Shows capacity (actual values, k>=3) only - energy values omitted due to k<3
+ */
+function createDirectionalChart(data) {
+    const ctx = document.getElementById('directional-chart');
+    if (!ctx) return;
+
+    const dirData = data.directional_breakdown;
+    if (!dirData) return;
+
+    // Get theme colors
+    const styles = getComputedStyle(document.documentElement);
+    const successColor = styles.getPropertyValue('--color-success').trim() || '#6eb43f';
+    const primaryColor = styles.getPropertyValue('--chart-domestic').trim() || '#45c3d3';
+
+    // Only show capacity (k>=3), energy is k<3 so not charted
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Turn-Up', 'Turn-Down'],
+            datasets: [
+                {
+                    label: 'Capacity (GW)',
+                    data: [
+                        dirData.turn_up.capacity_mw / 1000,
+                        dirData.turn_down.capacity_mw / 1000
+                    ],
+                    backgroundColor: [successColor, primaryColor],
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            ...CHART_DEFAULTS,
+            plugins: {
+                ...CHART_DEFAULTS.plugins,
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Flexibility by Direction (Capacity GW)'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label;
+                            const value = context.parsed.y;
+                            return `${label}: ${value.toFixed(1)} GW`;
+                        },
+                        afterLabel: function(context) {
+                            const idx = context.dataIndex;
+                            if (idx === 0) return `Energy: ${dirData.turn_up.energy_gwh_range} (range)`;
+                            return `Energy: ${dirData.turn_down.energy_gwh_range} (range)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Capacity (GW)' }
+                }
+            }
+        }
+    });
+
+    if (!window.DashboardState.charts.overview) {
+        window.DashboardState.charts.overview = [];
+    }
+    window.DashboardState.charts.overview.push(chart);
+}
+
+/**
+ * Methodology v7: Explicit vs Implicit Doughnut Chart
+ */
+function createFlexTypeChart(data) {
+    const ctx = document.getElementById('flex-type-chart');
+    if (!ctx) return;
+
+    const flexData = data.flexibility_type_breakdown;
+    if (!flexData) return;
+
+    // Get theme colors
+    const styles = getComputedStyle(document.documentElement);
+    const domesticColor = styles.getPropertyValue('--chart-domestic').trim() || CHART_COLORS.domestic;
+    const icColor = styles.getPropertyValue('--chart-ic').trim() || CHART_COLORS.ic;
+
+    const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Explicit (Managed)', 'Implicit (ToU Response)'],
+            datasets: [{
+                data: [flexData.explicit.capacity_mw, flexData.implicit.capacity_mw],
+                backgroundColor: [domesticColor, icColor],
+                borderColor: '#ffffff',
+                borderWidth: 3,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            ...CHART_DEFAULTS,
+            cutout: '60%',
+            plugins: {
+                ...CHART_DEFAULTS.plugins,
+                title: {
+                    display: true,
+                    text: 'Explicit vs Implicit Flexibility'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct = ((value / total) * 100).toFixed(1);
+                            return `${context.label}: ${(value / 1000).toFixed(1)} GW (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    if (!window.DashboardState.charts.overview) {
+        window.DashboardState.charts.overview = [];
+    }
+    window.DashboardState.charts.overview.push(chart);
+}
+
+/**
+ * Methodology v7: Energy Breakdown Chart
+ * Note: Explicit/Implicit use range midpoints due to k<3 disclosure control
+ */
+function createEnergyBreakdownChart(data) {
+    const ctx = document.getElementById('energy-breakdown-chart');
+    if (!ctx) return;
+
+    const energyData = data.energy_metrics;
+    if (!energyData) return;
+
+    // Use midpoints for illustrative/range values
+    const explicitMidpoint = energyData.explicit.illustrative ?
+        (energyData.explicit.delivered_gwh_min + energyData.explicit.delivered_gwh_max) / 2 : 0;
+    const implicitMidpoint = energyData.implicit.illustrative ?
+        (energyData.implicit.delivered_gwh_min + energyData.implicit.delivered_gwh_max) / 2 : 0;
+
+    // Get theme colors
+    const styles = getComputedStyle(document.documentElement);
+    const illustrativeColor = styles.getPropertyValue('--chart-illustrative').trim() || '#eb8800';
+    const successColor = styles.getPropertyValue('--color-success').trim() || '#6eb43f';
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Explicit [Range]', 'Implicit [Range]', 'Total'],
+            datasets: [
+                {
+                    label: 'Delivered (GWh)',
+                    data: [
+                        explicitMidpoint,
+                        implicitMidpoint,
+                        energyData.total.delivered_gwh
+                    ],
+                    backgroundColor: [
+                        illustrativeColor + 'b3',  // Orange with transparency for illustrative
+                        illustrativeColor + 'b3',  // Orange with transparency for illustrative
+                        successColor + 'cc'        // Green for actual
+                    ],
+                    borderColor: [illustrativeColor, illustrativeColor, successColor],
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            ...CHART_DEFAULTS,
+            plugins: {
+                ...CHART_DEFAULTS.plugins,
+                title: {
+                    display: true,
+                    text: 'Energy Flexibility (GWh) - Orange = Range Estimates (k<3)'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const idx = context.dataIndex;
+                            if (idx === 0) return `Explicit: ${energyData.explicit.delivered_gwh_range} (range)`;
+                            if (idx === 1) return `Implicit: ${energyData.implicit.delivered_gwh_range} (range)`;
+                            return `Total: ${context.parsed.y.toLocaleString()} GWh`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Energy (GWh)' }
+                }
+            }
+        }
+    });
+
+    if (!window.DashboardState.charts.overview) {
+        window.DashboardState.charts.overview = [];
+    }
+    window.DashboardState.charts.overview.push(chart);
+}
+
+/**
+ * Methodology v7: Latent Potential Bar Chart
+ */
+function createLatentPotentialChart(data) {
+    const ctx = document.getElementById('latent-potential-chart');
+    if (!ctx) return;
+
+    const latentData = data.latent_potential;
+    if (!latentData || !latentData.by_asset_class) return;
+
+    const assets = latentData.by_asset_class.filter(a => a.latent_gw);
+    const labels = assets.map(a => a.display_name);
+    const values = assets.map(a => a.latent_gw);
+
+    // Get theme colors
+    const styles = getComputedStyle(document.documentElement);
+    const teal = styles.getPropertyValue('--chart-domestic').trim() || '#45c3d3';
+    const green = styles.getPropertyValue('--chart-ic').trim() || '#6eb43f';
+    const orange = styles.getPropertyValue('--chart-illustrative').trim() || '#eb8800';
+    const crimson = styles.getPropertyValue('--color-danger').trim() || '#c41230';
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Latent Potential (GW)',
+                data: values,
+                backgroundColor: [
+                    teal, green, orange, crimson
+                ],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            ...CHART_DEFAULTS,
+            indexAxis: 'y',
+            plugins: {
+                ...CHART_DEFAULTS.plugins,
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Latent Flexibility Potential by Asset Class'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const asset = assets[context.dataIndex];
+                            return [
+                                `Potential: ${context.parsed.x.toFixed(1)} GW`,
+                                `GB Deployed: ${(asset.gb_deployed / 1000000).toFixed(2)}M units`,
+                                `Source: ${asset.source}`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Potential Capacity (GW)' }
+                }
+            }
+        }
+    });
+
+    if (!window.DashboardState.charts.projections) {
+        window.DashboardState.charts.projections = [];
+    }
+    window.DashboardState.charts.projections.push(chart);
+}
+
+/**
+ * Methodology v7: Future Potential Timeline Chart
+ */
+function createFutureTimelineChart(data) {
+    const ctx = document.getElementById('future-timeline-chart');
+    if (!ctx) return;
+
+    const futureData = data.future_potential;
+    if (!futureData) return;
+
+    const currentGW = data.metrics.total_available_mw / 1000;
+
+    // Get theme colors
+    const styles = getComputedStyle(document.documentElement);
+    const primaryColor = styles.getPropertyValue('--chart-domestic').trim() || '#45c3d3';
+    const successColor = styles.getPropertyValue('--color-success').trim() || '#6eb43f';
+    const warningColor = styles.getPropertyValue('--color-warning').trim() || '#eb8800';
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['2025 (Current)', '2030', '2050'],
+            datasets: [
+                {
+                    label: 'Central Scenario',
+                    data: [currentGW, futureData['2030'].central_gw, futureData['2050'].central_gw],
+                    borderColor: primaryColor,
+                    backgroundColor: primaryColor + '33', // Add transparency
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 8,
+                    pointHoverRadius: 12
+                },
+                {
+                    label: 'High Scenario',
+                    data: [currentGW, futureData['2030'].range_max_gw, futureData['2050'].range_max_gw],
+                    borderColor: successColor,
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 6
+                },
+                {
+                    label: 'Low Scenario',
+                    data: [currentGW, futureData['2030'].range_min_gw, futureData['2050'].range_min_gw],
+                    borderColor: warningColor,
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 6
+                }
+            ]
+        },
+        options: {
+            ...CHART_DEFAULTS,
+            plugins: {
+                ...CHART_DEFAULTS.plugins,
+                title: {
+                    display: true,
+                    text: 'Flexibility Potential Trajectory (GW)'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y.toFixed(0)} GW`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 250,
+                    title: { display: true, text: 'Flexibility Capacity (GW)' }
+                }
+            }
+        }
+    });
+
+    if (!window.DashboardState.charts.projections) {
+        window.DashboardState.charts.projections = [];
+    }
+    window.DashboardState.charts.projections.push(chart);
+}
+
+/**
+ * Create 2030 Technology Breakdown Chart
+ */
+function create2030TechChart(data) {
+    const ctx = document.getElementById('tech-2030-chart');
+    if (!ctx) return;
+
+    const futureData = data.future_potential?.['2030'];
+    if (!futureData || !futureData.by_technology) return;
+
+    const techs = futureData.by_technology;
+    const labels = techs.map(t => t.technology);
+    const values = techs.map(t => t.gw);
+
+    const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: ['#2E86AB', '#A23B72', '#F18F01', '#4CAF50'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            ...CHART_DEFAULTS,
+            cutout: '50%',
+            plugins: {
+                ...CHART_DEFAULTS.plugins,
+                title: {
+                    display: true,
+                    text: '2030 Flexibility by Technology'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const tech = techs[context.dataIndex];
+                            return [`${context.label}: ${context.parsed} GW`, tech.note];
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    if (!window.DashboardState.charts.projections) {
+        window.DashboardState.charts.projections = [];
+    }
+    window.DashboardState.charts.projections.push(chart);
+}
+
 // Export for use
 window.initializeCharts = initializeCharts;
 window.CHART_COLORS = CHART_COLORS;
+window.createDirectionalChart = createDirectionalChart;
+window.createFlexTypeChart = createFlexTypeChart;
+window.createEnergyBreakdownChart = createEnergyBreakdownChart;
+window.createLatentPotentialChart = createLatentPotentialChart;
+window.createFutureTimelineChart = createFutureTimelineChart;
+window.create2030TechChart = create2030TechChart;

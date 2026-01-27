@@ -14,8 +14,8 @@ html {
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     line-height: 1.6;
-    color: #333;
-    background-color: #f5f7fa;
+    color: var(--text-primary, #333);
+    background-color: var(--body-bg, #f5f7fa);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -23,8 +23,8 @@ body {
 
 /* Header */
 .header {
-    background: linear-gradient(135deg, #2E86AB 0%, #1a5276 100%);
-    color: white;
+    background: var(--header-bg, linear-gradient(135deg, #45c3d3 0%, #6eb43f 100%));
+    color: var(--header-text, white);
     padding: 1rem 2rem;
     position: sticky;
     top: 0;
@@ -42,13 +42,29 @@ body {
 
 .logo {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+}
+
+.logo-img {
+    height: 40px;
+    width: auto;
+}
+
+.logo-fallback {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
 }
 
 .logo-text {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
+    font-weight: 400;
+    opacity: 0.7;
+}
+
+.logo-text-bold {
+    font-size: 1.4rem;
     font-weight: 700;
-    letter-spacing: 2px;
 }
 
 .logo-subtitle {
@@ -72,11 +88,11 @@ body {
 }
 
 .nav-link:hover {
-    background-color: rgba(255,255,255,0.15);
+    background-color: var(--nav-hover-bg, rgba(255,255,255,0.15));
 }
 
 .nav-link.active {
-    background-color: rgba(255,255,255,0.25);
+    background-color: var(--nav-active-bg, rgba(255,255,255,0.25));
 }
 
 /* Main Content */
@@ -111,12 +127,12 @@ body {
 
 .page-header h1 {
     font-size: 2.5rem;
-    color: #2E86AB;
+    color: var(--section-title-color, #45c3d3);
     margin-bottom: 0.5rem;
 }
 
 .page-header .subtitle {
-    color: #666;
+    color: var(--text-secondary, #666);
     font-size: 1.1rem;
 }
 
@@ -149,13 +165,15 @@ body {
 }
 
 .metric-card {
-    background: white;
-    border-radius: 12px;
+    background: var(--card-bg, white);
+    border-radius: var(--card-radius, 12px);
+    border: var(--card-border, none);
     padding: 1.5rem;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.08));
     transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
+    color: var(--text-primary, #333);
 }
 
 .metric-card:hover {
@@ -164,8 +182,8 @@ body {
 }
 
 .metric-card.primary {
-    background: linear-gradient(135deg, #2E86AB 0%, #1a5276 100%);
-    color: white;
+    background: var(--metric-primary-bg, linear-gradient(135deg, #45c3d3 0%, #3ba8b6 100%));
+    color: var(--metric-primary-text, white);
 }
 
 .metric-icon {
@@ -205,22 +223,22 @@ body {
 
 /* Narrative Card */
 .narrative-card {
-    background: white;
-    border-radius: 12px;
+    background: var(--card-bg, white);
+    border-radius: var(--card-radius, 12px);
     padding: 1.5rem 2rem;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-left: 4px solid #2E86AB;
+    box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.08));
+    border-left: 4px solid var(--section-title-color, #45c3d3);
 }
 
 .narrative-card h3 {
-    color: #2E86AB;
+    color: var(--section-title-color, #45c3d3);
     margin-bottom: 0.75rem;
     font-size: 1.1rem;
 }
 
 .narrative-card p {
-    color: #555;
+    color: var(--text-secondary, #555);
     line-height: 1.7;
 }
 
@@ -233,10 +251,11 @@ body {
 }
 
 .chart-card {
-    background: white;
-    border-radius: 12px;
+    background: var(--card-bg, white);
+    border-radius: var(--card-radius, 12px);
+    border: var(--card-border, none);
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.08));
 }
 
 .chart-card.full-width {
@@ -244,7 +263,7 @@ body {
 }
 
 .chart-card h3 {
-    color: #333;
+    color: var(--text-primary, #333);
     margin-bottom: 1rem;
     font-size: 1.1rem;
 }
@@ -270,18 +289,18 @@ body {
 }
 
 .sector-card {
-    background: white;
-    border-radius: 12px;
+    background: var(--card-bg, white);
+    border-radius: var(--card-radius, 12px);
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.08));
 }
 
 .sector-card.domestic {
-    border-top: 4px solid #2E86AB;
+    border-top: 4px solid var(--chart-domestic, #45c3d3);
 }
 
 .sector-card.ic {
-    border-top: 4px solid #A23B72;
+    border-top: 4px solid var(--chart-ic, #6eb43f);
 }
 
 .sector-card h3 {
@@ -312,7 +331,7 @@ body {
 }
 
 .sector-link {
-    color: #2E86AB;
+    color: var(--link-color, #45c3d3);
     text-decoration: none;
     font-weight: 500;
     display: inline-flex;
@@ -322,6 +341,7 @@ body {
 
 .sector-link:hover {
     text-decoration: underline;
+    color: var(--link-hover, #3ba8b6);
 }
 
 /* Methodology Grid */
@@ -333,20 +353,20 @@ body {
 }
 
 .method-card {
-    background: white;
-    border-radius: 12px;
+    background: var(--card-bg, white);
+    border-radius: var(--card-radius, 12px);
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.08));
 }
 
 .method-card h3 {
-    color: #2E86AB;
+    color: var(--section-title-color, #45c3d3);
     margin-bottom: 0.75rem;
     font-size: 1.1rem;
 }
 
 .method-card p {
-    color: #555;
+    color: var(--text-secondary, #555);
     font-size: 0.95rem;
     line-height: 1.6;
 }
@@ -359,7 +379,7 @@ body {
 }
 
 .k-badge {
-    background: #2E86AB;
+    background: var(--section-title-color, #45c3d3);
     color: white;
     padding: 0.3rem 0.75rem;
     border-radius: 4px;
@@ -421,9 +441,9 @@ body {
 
 /* CTA Card */
 .cta-card {
-    background: linear-gradient(135deg, #2E86AB 0%, #1a5276 100%);
-    color: white;
-    border-radius: 12px;
+    background: var(--metric-primary-bg, linear-gradient(135deg, #45c3d3 0%, #3ba8b6 100%));
+    color: var(--metric-primary-text, white);
+    border-radius: var(--card-radius, 12px);
     padding: 2rem;
     text-align: center;
 }
@@ -440,7 +460,7 @@ body {
 .cta-button {
     display: inline-block;
     background: white;
-    color: #2E86AB;
+    color: var(--section-title-color, #45c3d3);
     padding: 0.75rem 2rem;
     border-radius: 6px;
     text-decoration: none;
@@ -454,8 +474,8 @@ body {
 
 /* Footer */
 .footer {
-    background: #1a2a3a;
-    color: white;
+    background: var(--footer-bg, #58585a);
+    color: var(--footer-text, white);
     padding: 1.5rem 2rem;
     margin-top: auto;
 }
@@ -586,7 +606,7 @@ body {
 
 /* Progress Bar */
 .progress-bar-container {
-    background: #e0e0e0;
+    background: var(--progress-track-bg, #e0e0e0);
     border-radius: 10px;
     height: 24px;
     overflow: hidden;
@@ -594,7 +614,7 @@ body {
 }
 
 .progress-bar {
-    background: linear-gradient(135deg, #2E86AB 0%, #1a5276 100%);
+    background: var(--progress-bar-bg, linear-gradient(135deg, #45c3d3 0%, #6eb43f 100%));
     height: 100%;
     border-radius: 10px;
     display: flex;
@@ -729,17 +749,18 @@ body {
     content: '→';
     position: absolute;
     left: 0;
-    color: #2E86AB;
+    color: var(--link-color, #45c3d3);
 }
 
 .source-list a {
-    color: #2E86AB;
+    color: var(--link-color, #45c3d3);
     text-decoration: none;
     font-weight: 500;
 }
 
 .source-list a:hover {
     text-decoration: underline;
+    color: var(--link-hover, #3ba8b6);
 }
 
 /* Range Examples */
@@ -839,4 +860,261 @@ body {
 .sector-metric.has-tooltip::after {
     max-width: 200px;
     font-size: 0.75rem;
+}
+
+/* =====================================================
+   METHODOLOGY V7 ADDITIONS
+   ===================================================== */
+
+/* Metrics Section */
+.metrics-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    color: var(--section-title-color, #45c3d3);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color, #e8f4f8);
+    padding-bottom: 0.5rem;
+}
+
+/* Grid variations */
+.metrics-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.metrics-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1024px) {
+    .metrics-grid-3,
+    .metrics-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .metrics-grid-3,
+    .metrics-grid-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Metric sublabel */
+.metric-sublabel {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+/* Asymmetry Card */
+.asymmetry-card {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border-left-color: #FF9800;
+}
+
+.asymmetry-card h3 {
+    color: #e65100;
+}
+
+/* Data Table */
+.data-table-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.data-table-card h3 {
+    color: #2E86AB;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.data-table th {
+    background: #f5f7fa;
+    color: #333;
+    font-weight: 600;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+.data-table tr:hover {
+    background: #f8f9fa;
+}
+
+.data-table .total-row {
+    background: #e8f4f8;
+    font-weight: 600;
+}
+
+.data-table .total-row td {
+    border-top: 2px solid #2E86AB;
+    color: #2E86AB;
+}
+
+/* Projection Cards */
+.projection-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.projection-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.projection-card h4 {
+    color: #2E86AB;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    border-bottom: 2px solid #e8f4f8;
+    padding-bottom: 0.5rem;
+}
+
+.projection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.projection-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.proj-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.proj-value {
+    font-weight: 700;
+    color: #2E86AB;
+    font-size: 1.1rem;
+}
+
+.proj-note {
+    font-size: 0.75rem;
+    color: #888;
+    font-style: italic;
+}
+
+/* Policy List */
+.policy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.policy-item {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 3px solid #4CAF50;
+}
+
+.policy-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.policy-target {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Chart Card Full Width */
+.chart-card.full-width {
+    margin-bottom: 2rem;
+}
+
+/* Methodology v7 specific badge */
+.v7-badge {
+    display: inline-block;
+    background: #4CAF50;
+    color: white;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+/* Illustrative/Range values styling */
+.illustrative-value {
+    color: #FF9800 !important;
+    font-style: italic;
+}
+
+.metric-card .metric-badge.illustrative {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #FF9800;
+    color: white;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+/* Energy metrics styling */
+.metric-card .metric-icon {
+    opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .projection-item {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+    }
+
+    .proj-value {
+        font-size: 1rem;
+    }
+
+    .data-table {
+        font-size: 0.8rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.5rem;
+    }
 }

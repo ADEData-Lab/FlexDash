@@ -1,0 +1,308 @@
+/* ==============================================
+   ADE:Demand Flex Dashboard Theme System
+
+   Brand Colors:
+   - Crimson:  #c41230
+   - Teal:     #45c3d3
+   - Green:    #6eb43f
+   - Grey:     #58585a
+   - Orange:   #eb8800
+   ============================================== */
+
+/* Base theme variables */
+:root {
+    /* Brand colors */
+    --brand-crimson: #c41230;
+    --brand-teal: #45c3d3;
+    --brand-green: #6eb43f;
+    --brand-grey: #58585a;
+    --brand-orange: #eb8800;
+
+    /* Semantic colors */
+    --color-warning: #eb8800;
+    --color-success: #6eb43f;
+    --color-danger: #c41230;
+    --color-info: #45c3d3;
+}
+
+/* ==============================================
+   THEME A: Energy Flow
+   Smooth, flowing, organic
+   ============================================== */
+[data-theme="energy-flow"] {
+    --header-bg: linear-gradient(135deg, #45c3d3 0%, #6eb43f 100%);
+    --header-text: #ffffff;
+    --header-text-secondary: rgba(255,255,255,0.9);
+
+    --body-bg: #f0f7f7;
+    --card-bg: #ffffff;
+    --card-border: none;
+    --card-shadow: 0 4px 12px rgba(69, 195, 211, 0.15);
+    --card-radius: 16px;
+
+    --text-primary: #58585a;
+    --text-secondary: #777;
+    --text-muted: #999;
+
+    --metric-primary-bg: linear-gradient(135deg, #45c3d3 0%, #3ba8b6 100%);
+    --metric-primary-text: #ffffff;
+
+    --chart-domestic: #45c3d3;
+    --chart-ic: #6eb43f;
+    --chart-illustrative: #eb8800;
+    --chart-palette: #45c3d3, #6eb43f, #eb8800, #c41230, #58585a;
+
+    --link-color: #45c3d3;
+    --link-hover: #3ba8b6;
+
+    --footer-bg: #58585a;
+    --footer-text: #ffffff;
+
+    --nav-active-bg: rgba(255,255,255,0.25);
+    --nav-hover-bg: rgba(255,255,255,0.15);
+
+    --progress-bar-bg: linear-gradient(135deg, #45c3d3 0%, #6eb43f 100%);
+    --progress-track-bg: #e0e0e0;
+
+    --border-color: #e8f4f4;
+    --section-title-color: #45c3d3;
+}
+
+/* ==============================================
+   THEME B: Data Grid
+   Clean, structured, technical
+   ============================================== */
+[data-theme="data-grid"] {
+    --header-bg: #58585a;
+    --header-text: #ffffff;
+    --header-text-secondary: rgba(255,255,255,0.8);
+
+    --body-bg: #f5f5f5;
+    --card-bg: #ffffff;
+    --card-border: 1px solid #e0e0e0;
+    --card-shadow: none;
+    --card-radius: 4px;
+
+    --text-primary: #333333;
+    --text-secondary: #58585a;
+    --text-muted: #888;
+
+    --metric-primary-bg: #45c3d3;
+    --metric-primary-text: #ffffff;
+
+    --chart-domestic: #45c3d3;
+    --chart-ic: #c41230;
+    --chart-illustrative: #eb8800;
+    --chart-palette: #45c3d3, #c41230, #6eb43f, #eb8800, #58585a;
+
+    --link-color: #45c3d3;
+    --link-hover: #3ba8b6;
+
+    --footer-bg: #333333;
+    --footer-text: #ffffff;
+
+    --nav-active-bg: rgba(69, 195, 211, 0.3);
+    --nav-hover-bg: rgba(255,255,255,0.1);
+
+    --progress-bar-bg: #45c3d3;
+    --progress-track-bg: #e0e0e0;
+
+    --border-color: #e0e0e0;
+    --section-title-color: #58585a;
+}
+
+/* ==============================================
+   THEME C: Bold Blocks
+   High contrast, confident, publication-quality
+   ============================================== */
+[data-theme="bold-blocks"] {
+    --header-bg: #c41230;
+    --header-text: #ffffff;
+    --header-text-secondary: rgba(255,255,255,0.9);
+
+    --body-bg: #ffffff;
+    --card-bg: #ffffff;
+    --card-border: none;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --card-radius: 8px;
+
+    --text-primary: #333333;
+    --text-secondary: #58585a;
+    --text-muted: #888;
+
+    --metric-primary-bg: #c41230;
+    --metric-primary-text: #ffffff;
+
+    --chart-domestic: #45c3d3;
+    --chart-ic: #c41230;
+    --chart-illustrative: #eb8800;
+    --chart-palette: #c41230, #45c3d3, #6eb43f, #eb8800, #58585a;
+
+    --link-color: #c41230;
+    --link-hover: #a00f28;
+
+    --footer-bg: #58585a;
+    --footer-text: #ffffff;
+
+    --nav-active-bg: rgba(255,255,255,0.3);
+    --nav-hover-bg: rgba(255,255,255,0.15);
+
+    --progress-bar-bg: #c41230;
+    --progress-track-bg: #e0e0e0;
+
+    --border-color: #eee;
+    --section-title-color: #c41230;
+}
+
+/* ==============================================
+   THEME D: Light & Airy
+   Minimal, spacious, Scandinavian
+   ============================================== */
+[data-theme="light-airy"] {
+    --header-bg: #ffffff;
+    --header-text: #58585a;
+    --header-text-secondary: #888;
+
+    --body-bg: #fafafa;
+    --card-bg: #ffffff;
+    --card-border: 1px solid #f0f0f0;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --card-radius: 12px;
+
+    --text-primary: #58585a;
+    --text-secondary: #777;
+    --text-muted: #aaa;
+
+    --metric-primary-bg: #45c3d3;
+    --metric-primary-text: #ffffff;
+
+    --chart-domestic: rgba(69, 195, 211, 0.7);
+    --chart-ic: rgba(110, 180, 63, 0.7);
+    --chart-illustrative: rgba(235, 136, 0, 0.7);
+    --chart-palette: rgba(69, 195, 211, 0.7), rgba(110, 180, 63, 0.7), rgba(235, 136, 0, 0.7), rgba(196, 18, 48, 0.7), rgba(88, 88, 90, 0.7);
+
+    --link-color: #45c3d3;
+    --link-hover: #3ba8b6;
+
+    --footer-bg: #f5f5f5;
+    --footer-text: #58585a;
+
+    --nav-active-bg: rgba(69, 195, 211, 0.15);
+    --nav-hover-bg: rgba(69, 195, 211, 0.08);
+
+    --progress-bar-bg: #45c3d3;
+    --progress-track-bg: #eee;
+
+    --border-color: #f0f0f0;
+    --section-title-color: #58585a;
+}
+
+/* Light & Airy header border */
+[data-theme="light-airy"] .header {
+    border-bottom: 2px solid #45c3d3;
+    box-shadow: none;
+}
+
+/* ==============================================
+   THEME E: Dashboard Dark
+   Dark mode, control room, real-time monitoring
+   ============================================== */
+[data-theme="dashboard-dark"] {
+    --header-bg: #1a1a1a;
+    --header-text: #ffffff;
+    --header-text-secondary: rgba(255,255,255,0.7);
+
+    --body-bg: #121212;
+    --card-bg: #1e1e1e;
+    --card-border: 1px solid #333;
+    --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    --card-radius: 8px;
+
+    --text-primary: #e0e0e0;
+    --text-secondary: #aaa;
+    --text-muted: #777;
+
+    --metric-primary-bg: linear-gradient(135deg, #45c3d3 0%, #3ba8b6 100%);
+    --metric-primary-text: #ffffff;
+
+    --chart-domestic: #45c3d3;
+    --chart-ic: #6eb43f;
+    --chart-illustrative: #eb8800;
+    --chart-palette: #45c3d3, #6eb43f, #eb8800, #c41230, #888;
+
+    --link-color: #45c3d3;
+    --link-hover: #5dd4e4;
+
+    --footer-bg: #0a0a0a;
+    --footer-text: #aaa;
+
+    --nav-active-bg: rgba(69, 195, 211, 0.3);
+    --nav-hover-bg: rgba(69, 195, 211, 0.15);
+
+    --progress-bar-bg: linear-gradient(135deg, #45c3d3 0%, #6eb43f 100%);
+    --progress-track-bg: #333;
+
+    --border-color: #333;
+    --section-title-color: #45c3d3;
+}
+
+/* Dark mode glow effects */
+[data-theme="dashboard-dark"] .metric-card.primary {
+    box-shadow: 0 0 20px rgba(69, 195, 211, 0.3);
+}
+
+[data-theme="dashboard-dark"] .progress-bar {
+    box-shadow: 0 0 10px rgba(69, 195, 211, 0.4);
+}
+
+/* ==============================================
+   Theme Selector Dropdown
+   ============================================== */
+.theme-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1.5rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid rgba(255,255,255,0.2);
+}
+
+[data-theme="light-airy"] .theme-selector {
+    border-left-color: rgba(88, 88, 90, 0.2);
+}
+
+.theme-selector label {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+.theme-selector select {
+    padding: 0.35rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    outline: none;
+}
+
+[data-theme="light-airy"] .theme-selector select {
+    border-color: #ddd;
+    background: #fff;
+    color: #58585a;
+}
+
+.theme-selector select:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+[data-theme="light-airy"] .theme-selector select:hover {
+    background: #f5f5f5;
+}
+
+.theme-selector select option {
+    background: #fff;
+    color: #333;
+}
