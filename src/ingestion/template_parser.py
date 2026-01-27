@@ -24,7 +24,7 @@ class ParsedData:
     contributor_name: str
     submission_date: datetime
     template_version: str
-    sector: str  # 'domestic' or 'ic'
+    sector: str  # 'domestic', 'ic', or 'mixed'
 
     # Core data
     assets: pd.DataFrame = field(default_factory=pd.DataFrame)
@@ -43,22 +43,6 @@ class TemplateParser:
 
     Supports V1.2 standard format and custom formats from various contributors.
     """
-
-    # Expected columns in V1.2 template
-    ASSET_COLUMNS = [
-        'asset_class', 'asset_type', 'capacity_mw', 'count',
-        'availability_hours', 'region', 'sector'
-    ]
-
-    EVENT_COLUMNS = [
-        'event_date', 'event_type', 'service_type', 'duration_hours',
-        'capacity_mw', 'energy_mwh', 'region'
-    ]
-
-    SERVICE_COLUMNS = [
-        'service_type', 'product', 'registered_capacity_mw',
-        'delivered_capacity_mw', 'delivery_factor'
-    ]
 
     def __init__(self, taxonomy: Dict = None):
         """
@@ -87,84 +71,7 @@ class TemplateParser:
         self._contributor_counter += 1
         contributor_id = f"CONTRIB_{self._contributor_counter:03d}"
 
-        # Detect format and route to appropriate parser
-        if self._is_standard_template(filepath):
-            return self._parse_standard_template(filepath, contributor_id)
-        else:
-            return self._parse_custom_format(filepath, contributor_id)
-
-    def _is_standard_template(self, filepath: Path) -> bool:
-        """Check if file follows V1.2 standard template format."""
-        try:
-            xl = pd.ExcelFile(filepath)
-            expected_sheets = {'Metadata', 'Asset Portfolio', 'Flexibility Events'}
-            return expected_sheets.issubset(set(xl.sheet_names))
-        except Exception:
-            return False
-
-    def _parse_standard_template(self, filepath: Path, contributor_id: str) -> ParsedData:
-        """Parse V1.2 standard template format."""
-        xl = pd.ExcelFile(filepath)
-        warnings = []
-        errors = []
-
-        # Parse metadata sheet
-        try:
-            metadata_df = pd.read_excel(xl, sheet_name='Metadata', header=None)
-            metadata = self._extract_metadata(metadata_df)
-        except Exception as e:
-            metadata = {}
-            errors.append(f"Failed to parse Metadata: {e}")
-
-        # Parse asset portfolio
-        try:
-            assets_df = pd.read_excel(xl, sheet_name='Asset Portfolio')
-            assets_df = self._standardize_assets(assets_df)
-        except Exception as e:
-            assets_df = pd.DataFrame()
-            errors.append(f"Failed to parse Asset Portfolio: {e}")
-
-        # Parse flexibility events
-        try:
-            events_df = pd.read_excel(xl, sheet_name='Flexibility Events')
-            events_df = self._standardize_events(events_df)
-        except Exception as e:
-            events_df = pd.DataFrame()
-            warnings.append(f"No Flexibility Events data: {e}")
-
-        # Parse service participation if present
-        try:
-            if 'Service Participation' in xl.sheet_names:
-                services_df = pd.read_excel(xl, sheet_name='Service Participation')
-                services_df = self._standardize_services(services_df)
-            else:
-                services_df = pd.DataFrame()
-        except Exception as e:
-            services_df = pd.DataFrame()
-            warnings.append(f"No Service Participation data: {e}")
-
-        # Determine sector from metadata or data
-        sector = metadata.get('sector', self._infer_sector(assets_df))
-
-        return ParsedData(
-            contributor_id=contributor_id,
-            contributor_name=filepath.stem,  # Will be pseudonymised
-            submission_date=datetime.now(),
-            template_version="V1.2",
-            sector=sector,
-            assets=assets_df,
-            events=events_df,
-            services=services_df,
-            metadata=metadata,
-            parse_warnings=warnings,
-            parse_errors=errors
-        )
-
-    def _parse_custom_format(self, filepath: Path, contributor_id: str) -> ParsedData:
-        """Parse non-standard submission formats."""
         filename = filepath.name.lower()
-        warnings = []
-        errors = []
 
         # Route to specific parsers based on filename patterns
         if 'flexitricity' in filename:
@@ -175,79 +82,55 @@ class TemplateParser:
             return self._parse_octopus(filepath, contributor_id)
         elif 'c-u-b' in filename or 'clf' in filename:
             return self._parse_cub(filepath, contributor_id)
+        elif 'axle' in filename:
+            return self._parse_axle(filepath, contributor_id)
+        elif 'british gas' in filename or 'british_gas' in filename:
+            return self._parse_british_gas(filepath, contributor_id)
+        elif 'pp ' in filename or 'pod' in filename:
+            return self._parse_pod_point(filepath, contributor_id)
         else:
-            # Generic fallback parser
             return self._parse_generic(filepath, contributor_id)
 
-    def _parse_flexitricity(self, filepath: Path, contributor_id: str) -> ParsedData:
-        """Parse Flexitricity custom format."""
-        logger.info("Using Flexitricity custom parser")
-
-        xl = pd.ExcelFile(filepath)
-        assets_df = pd.DataFrame()
-        events_df = pd.DataFrame()
-
-        # Flexitricity typically provides event-level data
-        for sheet in xl.sheet_names:
-            df = pd.read_excel(xl, sheet_name=sheet)
-            if 'capacity' in df.columns.str.lower().tolist():
-                events_df = pd.concat([events_df, df], ignore_index=True)
-
-        events_df = self._standardize_events(events_df)
-
-        return ParsedData(
-            contributor_id=contributor_id,
-            contributor_name="Flexitricity",
-            submission_date=datetime.now(),
-            template_version="Custom",
-            sector="ic",  # Flexitricity is I&C aggregator
-            assets=assets_df,
-            events=events_df,
-            services=pd.DataFrame(),
-            metadata={'format': 'flexitricity_custom'},
-            parse_warnings=[],
-            parse_errors=[]
-        )
-
-    def _parse_enel(self, filepath: Path, contributor_id: str) -> ParsedData:
-        """Parse ENEL demand data format."""
-        logger.info("Using ENEL custom parser")
-
-        xl = pd.ExcelFile(filepath)
-        df = pd.read_excel(xl, sheet_name=0)  # Read first sheet
-
-        # Map ENEL columns to standard format
-        assets_df = self._standardize_assets(df)
-
-        return ParsedData(
-            contributor_id=contributor_id,
-            contributor_name="ENEL",
-            submission_date=datetime.now(),
-            template_version="Custom",
-            sector="domestic",
-            assets=assets_df,
-            events=pd.DataFrame(),
-            services=pd.DataFrame(),
-            metadata={'format': 'enel_demand'},
-            parse_warnings=[],
-            parse_errors=[]
-        )
-
     def _parse_octopus(self, filepath: Path, contributor_id: str) -> ParsedData:
-        """Parse Octopus Energy format."""
+        """Parse Octopus Energy (OE_ADE_Response) format."""
         logger.info("Using Octopus custom parser")
 
-        xl = pd.ExcelFile(filepath)
-        df = pd.read_excel(xl, sheet_name=0)
+        df = pd.read_excel(filepath, sheet_name=0, header=0)
 
-        assets_df = self._standardize_assets(df)
+        # The Octopus file has 9 columns: [sector], Assets, 7th Dec (Current), 1st Nov, 28 Feb, blank, Description, blank, blank
+        # Rename only the columns we need
+        col_names = ['sector', 'asset_type', 'count_current', 'count_nov', 'count_feb'] + [f'col_{i}' for i in range(len(df.columns) - 5)]
+        df.columns = col_names[:len(df.columns)]
+        df = df.dropna(subset=['asset_type'])
+        df['sector'] = df['sector'].ffill()
+
+        # Create standardized asset records
+        assets = []
+        for _, row in df.iterrows():
+            if pd.notna(row['asset_type']) and row['asset_type'] != 'Assets':
+                asset_class = self._map_asset_type(str(row['asset_type']))
+                sector = 'domestic' if str(row.get('sector', '')).lower() == 'domestic' else 'ic'
+                count = row.get('count_current', 0)
+                try:
+                    count = int(float(count)) if pd.notna(count) else 0
+                except (ValueError, TypeError):
+                    count = 0
+                if count > 0:
+                    assets.append({
+                        'asset_class': asset_class,
+                        'sector': sector,
+                        'count': count,
+                        'capacity_mw': self._estimate_capacity(asset_class, count)
+                    })
+
+        assets_df = pd.DataFrame(assets) if assets else pd.DataFrame()
 
         return ParsedData(
             contributor_id=contributor_id,
             contributor_name="Octopus",
             submission_date=datetime.now(),
             template_version="Custom",
-            sector="domestic",
+            sector="mixed",
             assets=assets_df,
             events=pd.DataFrame(),
             services=pd.DataFrame(),
@@ -256,14 +139,130 @@ class TemplateParser:
             parse_errors=[]
         )
 
+    def _parse_enel(self, filepath: Path, contributor_id: str) -> ParsedData:
+        """Parse ENEL demand data format."""
+        logger.info("Using ENEL custom parser")
+
+        df = pd.read_excel(filepath, sheet_name=0, header=0)
+
+        # ENEL has: Industry, MWs, Sites
+        df.columns = ['industry', 'capacity_mw', 'site_count']
+        df = df.dropna(subset=['industry'])
+
+        # Create standardized asset records
+        assets = []
+        for _, row in df.iterrows():
+            if pd.notna(row['industry']) and row['industry'] != 'Industry':
+                assets.append({
+                    'asset_class': self._map_industry_to_asset(str(row['industry'])),
+                    'sector': 'ic',
+                    'count': int(row.get('site_count', 1)) if pd.notna(row.get('site_count')) else 1,
+                    'capacity_mw': float(row.get('capacity_mw', 0)) if pd.notna(row.get('capacity_mw')) else 0
+                })
+
+        assets_df = pd.DataFrame(assets) if assets else pd.DataFrame()
+
+        return ParsedData(
+            contributor_id=contributor_id,
+            contributor_name="ENEL",
+            submission_date=datetime.now(),
+            template_version="Custom",
+            sector="ic",
+            assets=assets_df,
+            events=pd.DataFrame(),
+            services=pd.DataFrame(),
+            metadata={'format': 'enel_demand'},
+            parse_warnings=[],
+            parse_errors=[]
+        )
+
+    def _parse_flexitricity(self, filepath: Path, contributor_id: str) -> ParsedData:
+        """Parse Flexitricity custom format."""
+        logger.info("Using Flexitricity custom parser")
+
+        # Flexitricity provides I&C aggregator data
+        # Try to extract any capacity data from the file
+        try:
+            df = pd.read_excel(filepath, sheet_name=0, header=None)
+
+            # Look for capacity values in the data
+            assets = []
+            total_capacity = 0
+
+            # Search for numeric values that could be capacity
+            for col in df.columns:
+                for val in df[col]:
+                    if isinstance(val, (int, float)) and not pd.isna(val) and 0 < val < 10000:
+                        total_capacity += val
+
+            if total_capacity > 0:
+                assets.append({
+                    'asset_class': 'ic_mixed',
+                    'sector': 'ic',
+                    'count': 1,
+                    'capacity_mw': total_capacity
+                })
+
+            assets_df = pd.DataFrame(assets) if assets else pd.DataFrame()
+
+        except Exception as e:
+            logger.warning(f"Flexitricity parse error: {e}")
+            assets_df = pd.DataFrame()
+
+        return ParsedData(
+            contributor_id=contributor_id,
+            contributor_name="Flexitricity",
+            submission_date=datetime.now(),
+            template_version="Custom",
+            sector="ic",
+            assets=assets_df,
+            events=pd.DataFrame(),
+            services=pd.DataFrame(),
+            metadata={'format': 'flexitricity_custom'},
+            parse_warnings=["Flexitricity data requires manual review"],
+            parse_errors=[]
+        )
+
     def _parse_cub(self, filepath: Path, contributor_id: str) -> ParsedData:
         """Parse C-U-B CLF data format."""
         logger.info("Using C-U-B custom parser")
 
-        xl = pd.ExcelFile(filepath)
-        df = pd.read_excel(xl, sheet_name=0)
+        try:
+            df = pd.read_excel(filepath, sheet_name=0, header=None)
 
-        assets_df = self._standardize_assets(df)
+            # Extract any recognizable data
+            assets = []
+
+            # Look for patterns in the data
+            for idx, row in df.iterrows():
+                for col_idx, val in enumerate(row):
+                    if isinstance(val, (int, float)) and not pd.isna(val) and 0 < val < 10000:
+                        # Check if there's a label nearby
+                        label = df.iloc[idx, 0] if col_idx > 0 else 'unknown'
+                        if pd.notna(label):
+                            assets.append({
+                                'asset_class': 'ic_mixed',
+                                'sector': 'ic',
+                                'count': 1,
+                                'capacity_mw': float(val)
+                            })
+                            break
+
+            # Deduplicate and aggregate
+            if assets:
+                total_mw = sum(a['capacity_mw'] for a in assets[:5])  # Take first few values
+                assets_df = pd.DataFrame([{
+                    'asset_class': 'ic_mixed',
+                    'sector': 'ic',
+                    'count': len(assets),
+                    'capacity_mw': total_mw
+                }])
+            else:
+                assets_df = pd.DataFrame()
+
+        except Exception as e:
+            logger.warning(f"C-U-B parse error: {e}")
+            assets_df = pd.DataFrame()
 
         return ParsedData(
             contributor_id=contributor_id,
@@ -275,6 +274,99 @@ class TemplateParser:
             events=pd.DataFrame(),
             services=pd.DataFrame(),
             metadata={'format': 'cub_clf'},
+            parse_warnings=["C-U-B data requires manual review"],
+            parse_errors=[]
+        )
+
+    def _parse_axle(self, filepath: Path, contributor_id: str) -> ParsedData:
+        """Parse Axle data format (ADE template V1.2)."""
+        logger.info("Using Axle custom parser")
+        return self._parse_ade_template(filepath, contributor_id, "Axle", "domestic")
+
+    def _parse_british_gas(self, filepath: Path, contributor_id: str) -> ParsedData:
+        """Parse British Gas data format (ADE template V1.2)."""
+        logger.info("Using British Gas custom parser")
+        return self._parse_ade_template(filepath, contributor_id, "BritishGas", "domestic")
+
+    def _parse_pod_point(self, filepath: Path, contributor_id: str) -> ParsedData:
+        """Parse Pod Point data format (ADE template V1.2)."""
+        logger.info("Using Pod Point custom parser")
+        return self._parse_ade_template(filepath, contributor_id, "PodPoint", "domestic")
+
+    def _parse_ade_template(self, filepath: Path, contributor_id: str, name: str, default_sector: str) -> ParsedData:
+        """Parse ADE template V1.2 format with complex structure."""
+        try:
+            df = pd.read_excel(filepath, sheet_name=0, header=None)
+
+            assets = []
+
+            # Look for the "Assets" row which contains headers
+            asset_row_idx = None
+            for idx, row in df.iterrows():
+                row_str = ' '.join([str(v) for v in row if pd.notna(v)]).lower()
+                if 'assets' in row_str and 'portfolio' in row_str:
+                    asset_row_idx = idx
+                    break
+
+            if asset_row_idx is not None:
+                # Parse asset data below the header
+                for idx in range(asset_row_idx + 1, min(asset_row_idx + 20, len(df))):
+                    row = df.iloc[idx]
+                    # Look for asset type in column 12 (typical template position)
+                    asset_type = None
+                    count = None
+
+                    for col_idx, val in enumerate(row):
+                        if pd.notna(val):
+                            val_str = str(val).lower()
+                            # Check for known asset types
+                            if any(at in val_str for at in ['ev', 'charger', 'heat pump', 'battery', 'bess', 'storage']):
+                                asset_type = val_str
+                            # Check for numeric counts
+                            elif isinstance(val, (int, float)) and 0 < val < 10000000:
+                                count = int(val)
+
+                    if asset_type and count:
+                        asset_class = self._map_asset_type(asset_type)
+                        assets.append({
+                            'asset_class': asset_class,
+                            'sector': default_sector,
+                            'count': count,
+                            'capacity_mw': self._estimate_capacity(asset_class, count)
+                        })
+
+            # If no assets found via structure, try to find any EV charger counts
+            if not assets:
+                for idx, row in df.iterrows():
+                    for col_idx, val in enumerate(row):
+                        if isinstance(val, (int, float)) and not pd.isna(val) and 1000 < val < 10000000:
+                            # Large number might be EV charger count
+                            assets.append({
+                                'asset_class': 'ev_charger',
+                                'sector': default_sector,
+                                'count': int(val),
+                                'capacity_mw': self._estimate_capacity('ev_charger', int(val))
+                            })
+                            break
+                    if assets:
+                        break
+
+            assets_df = pd.DataFrame(assets) if assets else pd.DataFrame()
+
+        except Exception as e:
+            logger.warning(f"{name} parse error: {e}")
+            assets_df = pd.DataFrame()
+
+        return ParsedData(
+            contributor_id=contributor_id,
+            contributor_name=name,
+            submission_date=datetime.now(),
+            template_version="V1.2",
+            sector=default_sector,
+            assets=assets_df,
+            events=pd.DataFrame(),
+            services=pd.DataFrame(),
+            metadata={'format': 'ade_template_v1.2'},
             parse_warnings=[],
             parse_errors=[]
         )
@@ -283,11 +375,29 @@ class TemplateParser:
         """Generic parser for unknown formats."""
         logger.warning(f"Using generic parser for {filepath.name}")
 
-        xl = pd.ExcelFile(filepath)
-        df = pd.read_excel(xl, sheet_name=0)
+        try:
+            df = pd.read_excel(filepath, sheet_name=0, header=None)
 
-        # Try to identify asset and capacity columns
-        assets_df = self._standardize_assets(df)
+            # Try to extract any meaningful data
+            assets = []
+            for idx, row in df.iterrows():
+                for val in row:
+                    if isinstance(val, (int, float)) and not pd.isna(val) and 100 < val < 10000000:
+                        assets.append({
+                            'asset_class': 'unknown',
+                            'sector': 'unknown',
+                            'count': int(val) if val > 100 else 1,
+                            'capacity_mw': float(val) if val < 10000 else self._estimate_capacity('ev_charger', int(val))
+                        })
+                        break
+                if assets:
+                    break
+
+            assets_df = pd.DataFrame(assets) if assets else pd.DataFrame()
+
+        except Exception as e:
+            logger.warning(f"Generic parse error: {e}")
+            assets_df = pd.DataFrame()
 
         return ParsedData(
             contributor_id=contributor_id,
@@ -303,88 +413,68 @@ class TemplateParser:
             parse_errors=[]
         )
 
-    def _extract_metadata(self, df: pd.DataFrame) -> Dict[str, Any]:
-        """Extract key-value pairs from metadata sheet."""
-        metadata = {}
-        for _, row in df.iterrows():
-            if pd.notna(row.iloc[0]) and pd.notna(row.iloc[1]):
-                key = str(row.iloc[0]).strip().lower().replace(' ', '_')
-                metadata[key] = row.iloc[1]
-        return metadata
+    def _map_asset_type(self, raw_type: str) -> str:
+        """Map raw asset type string to standardized asset class."""
+        raw_lower = raw_type.lower()
 
-    def _standardize_assets(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Standardize asset dataframe columns."""
-        if df.empty:
-            return df
+        if any(x in raw_lower for x in ['ev', 'charger', 'vehicle']):
+            return 'ev_charger'
+        elif any(x in raw_lower for x in ['heat pump', 'hp', 'ashp', 'gshp']):
+            return 'heat_pump'
+        elif any(x in raw_lower for x in ['bess', 'battery', 'storage']):
+            return 'battery_storage'
+        elif any(x in raw_lower for x in ['hot water', 'immersion', 'heater']):
+            return 'smart_hot_water'
+        elif any(x in raw_lower for x in ['cold', 'refriger', 'freezer']):
+            return 'cold_storage'
+        elif any(x in raw_lower for x in ['water treatment', 'sewage', 'wastewater']):
+            return 'water_treatment'
+        elif any(x in raw_lower for x in ['manufactur', 'industrial', 'factory']):
+            return 'manufacturing'
+        elif any(x in raw_lower for x in ['hvac', 'air condition', 'cooling']):
+            return 'commercial_hvac'
+        else:
+            return 'other'
 
-        # Normalize column names
-        df.columns = df.columns.str.lower().str.strip().str.replace(' ', '_')
+    def _map_industry_to_asset(self, industry: str) -> str:
+        """Map ENEL industry type to asset class."""
+        ind_lower = industry.lower()
 
-        # Map common column name variations
-        column_mapping = {
-            'asset': 'asset_class',
-            'type': 'asset_type',
-            'capacity': 'capacity_mw',
-            'capacity_kw': 'capacity_mw',  # Will need conversion
-            'number': 'count',
-            'quantity': 'count',
-            'dno': 'region',
-            'dso': 'region',
+        if 'food' in ind_lower or 'drink' in ind_lower:
+            return 'cold_storage'
+        elif 'water' in ind_lower:
+            return 'water_treatment'
+        elif 'manufact' in ind_lower or 'metal' in ind_lower:
+            return 'manufacturing'
+        elif 'chemical' in ind_lower:
+            return 'manufacturing'
+        elif 'energy' in ind_lower:
+            return 'commercial_battery'
+        elif 'recycl' in ind_lower:
+            return 'manufacturing'
+        else:
+            return 'ic_mixed'
+
+    def _estimate_capacity(self, asset_class: str, count: int) -> float:
+        """Estimate MW capacity from asset count using typical ratings."""
+        # Typical capacity per unit in kW
+        typical_kw = {
+            'ev_charger': 7.0,  # Average of 3.6-22 kW
+            'heat_pump': 5.0,  # Average domestic HP
+            'battery_storage': 5.0,  # Average home battery
+            'smart_hot_water': 3.0,
+            'cold_storage': 100.0,  # Per site
+            'water_treatment': 500.0,  # Per site
+            'manufacturing': 200.0,  # Per site
+            'commercial_hvac': 50.0,
+            'commercial_battery': 100.0,
+            'ic_mixed': 100.0,
+            'other': 5.0,
+            'unknown': 5.0
         }
 
-        df = df.rename(columns={k: v for k, v in column_mapping.items() if k in df.columns})
-
-        # Convert kW to MW if needed
-        if 'capacity_kw' in df.columns:
-            df['capacity_mw'] = df['capacity_kw'] / 1000
-
-        return df
-
-    def _standardize_events(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Standardize events dataframe columns."""
-        if df.empty:
-            return df
-
-        df.columns = df.columns.str.lower().str.strip().str.replace(' ', '_')
-
-        column_mapping = {
-            'date': 'event_date',
-            'type': 'event_type',
-            'service': 'service_type',
-            'duration': 'duration_hours',
-            'capacity': 'capacity_mw',
-            'energy': 'energy_mwh',
-        }
-
-        df = df.rename(columns={k: v for k, v in column_mapping.items() if k in df.columns})
-
-        return df
-
-    def _standardize_services(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Standardize services dataframe columns."""
-        if df.empty:
-            return df
-
-        df.columns = df.columns.str.lower().str.strip().str.replace(' ', '_')
-
-        return df
-
-    def _infer_sector(self, assets_df: pd.DataFrame) -> str:
-        """Infer sector from asset types."""
-        if assets_df.empty:
-            return "unknown"
-
-        domestic_indicators = {'ev', 'heat_pump', 'battery', 'hot_water'}
-        ic_indicators = {'cold_storage', 'manufacturing', 'water_treatment'}
-
-        if 'asset_class' in assets_df.columns:
-            asset_types = set(assets_df['asset_class'].str.lower())
-            if asset_types & domestic_indicators:
-                return "domestic"
-            elif asset_types & ic_indicators:
-                return "ic"
-
-        return "unknown"
+        kw_per_unit = typical_kw.get(asset_class, 5.0)
+        return (count * kw_per_unit) / 1000  # Convert to MW
 
 
 def parse_all_files(data_dir: Path, taxonomy: Dict = None) -> List[ParsedData]:
@@ -405,8 +495,10 @@ def parse_all_files(data_dir: Path, taxonomy: Dict = None) -> List[ParsedData]:
     excel_files = list(data_dir.glob("*.xlsx")) + list(data_dir.glob("*.xls"))
 
     for filepath in excel_files:
-        # Skip temporary files
+        # Skip temporary files and files in Notes subfolder
         if filepath.name.startswith('~$'):
+            continue
+        if 'notes' in str(filepath.parent).lower():
             continue
 
         try:
