@@ -46,16 +46,17 @@
                     <div class="metric-label">Total Available (MW)</div>
                     <div class="metric-badge" id="total-available-badge"></div>
                 </div>
-                <div class="metric-card">
+                <div class="metric-card has-tooltip" data-tooltip="Delivery data not yet collected. Phase 1 focused on asset portfolio data. Event-level dispatch data will be requested in future phases.">
                     <div class="metric-icon">📊</div>
-                    <div class="metric-value" id="total-delivered">--</div>
+                    <div class="metric-value not-available" id="total-delivered">N/A</div>
                     <div class="metric-label">Total Delivered (MW)</div>
-                    <div class="metric-badge" id="total-delivered-badge"></div>
+                    <div class="metric-badge unavailable-badge">Phase 2</div>
                 </div>
-                <div class="metric-card">
+                <div class="metric-card has-tooltip" data-tooltip="Delivery factor requires both available and delivered data. Delivered data will be collected in future phases.">
                     <div class="metric-icon">📈</div>
-                    <div class="metric-value" id="delivery-factor">--%</div>
+                    <div class="metric-value not-available" id="delivery-factor">N/A</div>
                     <div class="metric-label">Delivery Factor</div>
+                    <div class="metric-badge unavailable-badge">Phase 2</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-icon">🏢</div>
@@ -97,8 +98,8 @@
                             <span class="value" id="domestic-available">--</span>
                             <span class="label">Available (MW)</span>
                         </div>
-                        <div class="sector-metric">
-                            <span class="value" id="domestic-delivered">--</span>
+                        <div class="sector-metric has-tooltip" data-tooltip="Delivery data not yet collected for Phase 1.">
+                            <span class="value not-available" id="domestic-delivered">N/A</span>
                             <span class="label">Delivered (MW)</span>
                         </div>
                     </div>
@@ -111,8 +112,8 @@
                             <span class="value" id="ic-available">--</span>
                             <span class="label">Available (MW)</span>
                         </div>
-                        <div class="sector-metric">
-                            <span class="value" id="ic-delivered">--</span>
+                        <div class="sector-metric has-tooltip" data-tooltip="Delivery data not yet collected for Phase 1.">
+                            <span class="value not-available" id="ic-delivered">N/A</span>
                             <span class="label">Delivered (MW)</span>
                         </div>
                     </div>
@@ -133,9 +134,10 @@
                     <div class="metric-value" id="domestic-total-mw">--</div>
                     <div class="metric-label">Total Capacity (MW)</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="domestic-delivery-pct">--%</div>
+                <div class="metric-card has-tooltip" data-tooltip="Delivery factor requires event-level dispatch data, which will be collected in future phases.">
+                    <div class="metric-value not-available" id="domestic-delivery-pct">N/A</div>
                     <div class="metric-label">Delivery Factor</div>
+                    <div class="metric-badge unavailable-badge">Phase 2</div>
                 </div>
             </div>
 
@@ -168,9 +170,10 @@
                     <div class="metric-value" id="ic-total-mw">--</div>
                     <div class="metric-label">Total Capacity (MW)</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="ic-delivery-pct">--%</div>
+                <div class="metric-card has-tooltip" data-tooltip="Delivery factor requires event-level dispatch data, which will be collected in future phases.">
+                    <div class="metric-value not-available" id="ic-delivery-pct">N/A</div>
                     <div class="metric-label">Delivery Factor</div>
+                    <div class="metric-badge unavailable-badge">Phase 2</div>
                 </div>
             </div>
 

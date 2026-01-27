@@ -205,25 +205,34 @@ function updateUI() {
 
     // Update headline metrics
     updateElement('total-available', formatNumber(data.metrics.total_available_mw));
-    updateElement('total-delivered', formatNumber(data.metrics.total_delivered_mw));
-    updateElement('delivery-factor', `${formatNumber(data.metrics.delivery_factor_pct)}%`);
     updateElement('contributor-count', data.metrics.contributor_count);
 
-    // Update sector metrics
+    // Note: total-delivered, delivery-factor are marked N/A in HTML (Phase 1 data limitation)
+    // Only update if we have actual delivered data in future phases
+    if (data.metrics.total_delivered_mw > 0) {
+        updateElement('total-delivered', formatNumber(data.metrics.total_delivered_mw));
+        updateElement('delivery-factor', `${formatNumber(data.metrics.delivery_factor_pct)}%`);
+    }
+
+    // Update sector metrics (available only - delivered marked N/A)
     updateElement('domestic-available', formatNumber(data.metrics.domestic?.available_mw));
-    updateElement('domestic-delivered', formatNumber(data.metrics.domestic?.delivered_mw));
     updateElement('ic-available', formatNumber(data.metrics.ic?.available_mw));
-    updateElement('ic-delivered', formatNumber(data.metrics.ic?.delivered_mw));
+
+    // Only update delivered if we have data
+    if (data.metrics.domestic?.delivered_mw > 0) {
+        updateElement('domestic-delivered', formatNumber(data.metrics.domestic?.delivered_mw));
+    }
+    if (data.metrics.ic?.delivered_mw > 0) {
+        updateElement('ic-delivered', formatNumber(data.metrics.ic?.delivered_mw));
+    }
 
     // Update domestic page
     updateElement('domestic-total-mw', formatNumber(data.metrics.domestic?.available_mw));
-    updateElement('domestic-delivery-pct',
-        `${formatNumber(calculateDeliveryFactor(data.metrics.domestic?.available_mw, data.metrics.domestic?.delivered_mw))}%`);
+    // domestic-delivery-pct is marked N/A in HTML
 
     // Update I&C page
     updateElement('ic-total-mw', formatNumber(data.metrics.ic?.available_mw));
-    updateElement('ic-delivery-pct',
-        `${formatNumber(calculateDeliveryFactor(data.metrics.ic?.available_mw, data.metrics.ic?.delivered_mw))}%`);
+    // ic-delivery-pct is marked N/A in HTML
 
     // Update narratives
     if (data.narratives) {
