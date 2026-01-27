@@ -1,0 +1,112 @@
+# FlexDash Disclosure Control Rules
+#
+# These rules ensure compliance with competition law and protect
+# commercially sensitive information from individual contributors.
+
+# Core disclosure thresholds
+thresholds:
+  # Minimum number of contributors for a cell to be published
+  k_anonymity: 3
+
+  # Minimum number of contributors for percentage calculations
+  k_percentage: 3
+
+  # Minimum number of observations for statistical measures
+  k_statistics: 5
+
+# Rounding rules
+rounding:
+  # Capacity values (MW)
+  capacity_mw:
+    precision: 10
+    method: "nearest"
+
+  # Energy values (MWh)
+  energy_mwh:
+    precision: 10
+    method: "nearest"
+
+  # Percentages
+  percentages:
+    precision: 1
+    method: "nearest"
+
+  # Counts (number of assets, events)
+  counts:
+    precision: 10
+    method: "nearest"
+
+# Suppression strategy
+suppression:
+  # What to do when k-threshold not met
+  primary_action: "suppress"        # Remove the cell entirely
+
+  # Fallback when suppression creates inference risk
+  secondary_action: "illustrative"  # Replace with illustrative data
+
+  # Dominance rule: suppress if top N contributors > X% of total
+  dominance:
+    enabled: true
+    top_n: 2
+    threshold_percent: 85
+
+# Illustrative data rules
+illustrative_data:
+  # Source for generating plausible values
+  source: "sector_averages"
+
+  # Must be marked clearly in output
+  labeling: "required"
+  label_text: "Illustrative"
+
+  # Variation to add to averages (as percentage)
+  variation_percent: 15
+
+  # Must maintain consistency with totals
+  consistency_required: true
+
+# Dimension-specific rules
+dimensions:
+  # Sector level (Domestic / I&C)
+  sector:
+    min_contributors: 3
+    allow_illustrative: true
+
+  # Asset class level
+  asset_class:
+    min_contributors: 3
+    allow_illustrative: true
+
+  # Geographic (DNO/DSO region)
+  geographic:
+    min_contributors: 3
+    max_granularity: "dso_region"
+    allow_illustrative: true
+
+  # Temporal (time periods)
+  temporal:
+    min_contributors: 3
+    max_granularity: "month"
+    allow_illustrative: true
+
+# Cross-tabulation rules
+cross_tabulation:
+  # Maximum dimensions to cross
+  max_dimensions: 2
+
+  # Apply stricter k for crossed dimensions
+  k_multiplier: 1.0
+
+  # Suppress entire table if too many cells fail
+  max_suppression_rate: 0.5
+
+# Audit requirements
+audit:
+  # Log all disclosure decisions
+  log_decisions: true
+
+  # Include contributor counts in audit (not in output)
+  log_contributor_counts: true
+
+  # Retain audit logs for N days
+  retention_days: 365
