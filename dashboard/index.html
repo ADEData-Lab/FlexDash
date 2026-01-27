@@ -71,6 +71,79 @@
                 <p id="narrative-headline">Loading dashboard data...</p>
             </div>
 
+            <!-- Market Context Card -->
+            <div class="context-card">
+                <h3>Market Context</h3>
+                <div class="context-grid">
+                    <!-- Progress to 2030 Target -->
+                    <div class="context-item">
+                        <div class="context-header">
+                            <span class="context-label">Progress to 2030 Target</span>
+                            <span class="context-source has-tooltip" data-tooltip="Government projects 30 GW of low-carbon flexibility needed by 2030. Source: Clean Power 2030 Action Plan (DESNZ)">ⓘ</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 46%;">
+                                <span class="progress-label">46%</span>
+                            </div>
+                        </div>
+                        <div class="progress-context">
+                            <span>13.8 GW observed</span>
+                            <span>30 GW target</span>
+                        </div>
+                        <p class="context-note">This dashboard captures flexibility from 6 contributors. The full market is larger but not yet measured.</p>
+                    </div>
+
+                    <!-- Smart EV Charging -->
+                    <div class="context-item">
+                        <div class="context-header">
+                            <span class="context-label">Smart EV Charging Coverage</span>
+                            <span class="context-source has-tooltip" data-tooltip="~1.2M battery EVs registered in UK (DfT 2024). Dashboard shows 635k smart chargers from contributing suppliers.">ⓘ</span>
+                        </div>
+                        <div class="context-stat">
+                            <span class="stat-value">635,000</span>
+                            <span class="stat-unit">smart chargers</span>
+                        </div>
+                        <p class="context-note">Represents significant penetration of the domestic smart charging market. Public chargers (~82k) are additional infrastructure.</p>
+                    </div>
+
+                    <!-- Market Growth -->
+                    <div class="context-item">
+                        <div class="context-header">
+                            <span class="context-label">Sector Growth (2024)</span>
+                            <span class="context-source has-tooltip" data-tooltip="Sources: MCS (heat pumps), GOV.UK (EV infrastructure), Energy Storage News (batteries)">ⓘ</span>
+                        </div>
+                        <div class="growth-indicators">
+                            <div class="growth-item">
+                                <span class="growth-label">Heat Pumps</span>
+                                <span class="growth-value positive">+75%</span>
+                            </div>
+                            <div class="growth-item">
+                                <span class="growth-label">EV Chargers</span>
+                                <span class="growth-value positive">+28%</span>
+                            </div>
+                            <div class="growth-item">
+                                <span class="growth-label">Grid Batteries</span>
+                                <span class="growth-value positive">+45%</span>
+                            </div>
+                        </div>
+                        <p class="context-note">Rapid market growth means this baseline will need regular updates to remain current.</p>
+                    </div>
+
+                    <!-- Data Coverage Warning -->
+                    <div class="context-item highlight">
+                        <div class="context-header">
+                            <span class="context-label">Important Caveats</span>
+                        </div>
+                        <ul class="caveat-list">
+                            <li><strong>Partial coverage:</strong> 6 contributors, not the full market</li>
+                            <li><strong>I&C classification:</strong> 64% of capacity is in mixed/unclassified I&C assets</li>
+                            <li><strong>Heat pump gap:</strong> Capacity data incomplete for this asset class</li>
+                            <li><strong>No delivery data:</strong> Available capacity only, not actual dispatch</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <!-- Charts Row -->
             <div class="charts-row">
                 <div class="chart-card">
@@ -252,6 +325,18 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="method-card">
+                <h3>External Data Sources</h3>
+                <p>Market context figures are drawn from publicly available sources:</p>
+                <ul class="source-list">
+                    <li><a href="https://www.gov.uk/government/publications/clean-power-2030-action-plan" target="_blank">Clean Power 2030 Action Plan</a> - DESNZ flexibility targets</li>
+                    <li><a href="https://mcscertified.com/2024-is-the-best-year-on-record-for-certified-heat-pump-installations-in-the-uk/" target="_blank">MCS Certified</a> - Heat pump installation statistics</li>
+                    <li><a href="https://www.gov.uk/government/collections/electric-vehicle-charging-infrastructure-statistics" target="_blank">GOV.UK</a> - EV charging infrastructure statistics</li>
+                    <li><a href="https://www.energy-storage.news/uk-reaches-6gw-8gwh-of-operational-bess-nearly-20gwh-under-construction/" target="_blank">Energy Storage News</a> - UK battery storage capacity</li>
+                    <li><a href="https://www.neso.energy/industry-information/balancing-services/demand-flexibility-service-dfs" target="_blank">NESO</a> - Demand Flexibility Service data</li>
+                </ul>
             </div>
 
             <div class="cta-card">

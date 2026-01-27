@@ -530,6 +530,218 @@ body {
     pointer-events: none;
 }
 
+/* Market Context Card */
+.context-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.context-card h3 {
+    color: #2E86AB;
+    margin-bottom: 1.25rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.context-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.context-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+.context-item.highlight {
+    background: #fff3e0;
+    border: 1px solid #FF9800;
+}
+
+.context-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.context-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.context-source {
+    color: #666;
+    cursor: help;
+    font-size: 0.9rem;
+}
+
+/* Progress Bar */
+.progress-bar-container {
+    background: #e0e0e0;
+    border-radius: 10px;
+    height: 24px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, #2E86AB 0%, #1a5276 100%);
+    height: 100%;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    transition: width 0.5s ease;
+}
+
+.progress-label {
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.progress-context {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+/* Context Stats */
+.context-stat {
+    margin-bottom: 0.75rem;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2E86AB;
+}
+
+.stat-unit {
+    font-size: 0.9rem;
+    color: #666;
+    margin-left: 0.25rem;
+}
+
+.context-note {
+    font-size: 0.8rem;
+    color: #666;
+    line-height: 1.4;
+    margin-top: 0.5rem;
+}
+
+/* Growth Indicators */
+.growth-indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.growth-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.growth-item:last-child {
+    border-bottom: none;
+}
+
+.growth-label {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.growth-value {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.growth-value.positive {
+    color: #4CAF50;
+}
+
+.growth-value.negative {
+    color: #f44336;
+}
+
+/* Caveat List */
+.caveat-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.caveat-list li {
+    padding: 0.4rem 0;
+    padding-left: 1.25rem;
+    position: relative;
+}
+
+.caveat-list li::before {
+    content: '⚠';
+    position: absolute;
+    left: 0;
+    font-size: 0.75rem;
+}
+
+.caveat-list li strong {
+    color: #333;
+}
+
+/* Source List */
+.source-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0 0 0;
+    font-size: 0.9rem;
+}
+
+.source-list li {
+    padding: 0.4rem 0;
+    padding-left: 1rem;
+    position: relative;
+    border-bottom: 1px solid #eee;
+}
+
+.source-list li:last-child {
+    border-bottom: none;
+}
+
+.source-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #2E86AB;
+}
+
+.source-list a {
+    color: #2E86AB;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.source-list a:hover {
+    text-decoration: underline;
+}
+
 /* Not Available Styling */
 .not-available {
     color: #999 !important;
