@@ -53,3 +53,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 6. C-U-B CLF Data Sheet.xlsx
 7. ENEL ADE - Demand Data.xlsx
 8. Merged Data Template V1.2.xlsx (combined)
+
+### 2025-01-27 - Pipeline Testing & Debugging
+
+**Actions:**
+- Ran initial pipeline test - identified data structure issues
+- Rewrote template_parser.py with custom parsers for each data format
+- Fixed Octopus parser to handle variable column counts
+- Fixed type conversion errors in count fields
+- Rewrote run_pipeline.py with inline disclosure control
+- Updated all unit tests to match new implementation
+
+**Pipeline Results (Successful Run):**
+- 7 data files parsed
+- 37 asset records from 6 contributors
+- 13,760 MW total capacity
+- Domestic: 4,550 MW (k=4 contributors) - SAFE
+- I&C: 9,210 MW (k=3 contributors) - SAFE
+- Both sectors meet k≥3 disclosure threshold
+
+**Test Results:**
+- 25 tests passed (all green)
+- Fixed asset type mapping order (cold before storage)
+- Fixed dominance rule assertion text
+- Rewrote ingestion tests for new parser methods
+
+**Key Fixes:**
+1. Data flow: Aggregation now happens inline with disclosure checks
+2. Column handling: Dynamic column naming for variable Excel formats
+3. Type safety: Try/except for string-to-numeric conversions
+4. Pattern order: Check 'cold' before 'storage' in asset mapping
