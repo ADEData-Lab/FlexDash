@@ -421,12 +421,12 @@ class TemplateParser:
             return 'ev_charger'
         elif any(x in raw_lower for x in ['heat pump', 'hp', 'ashp', 'gshp']):
             return 'heat_pump'
+        elif any(x in raw_lower for x in ['cold', 'refriger', 'freezer']):
+            return 'cold_storage'
         elif any(x in raw_lower for x in ['bess', 'battery', 'storage']):
             return 'battery_storage'
         elif any(x in raw_lower for x in ['hot water', 'immersion', 'heater']):
             return 'smart_hot_water'
-        elif any(x in raw_lower for x in ['cold', 'refriger', 'freezer']):
-            return 'cold_storage'
         elif any(x in raw_lower for x in ['water treatment', 'sewage', 'wastewater']):
             return 'water_treatment'
         elif any(x in raw_lower for x in ['manufactur', 'industrial', 'factory']):

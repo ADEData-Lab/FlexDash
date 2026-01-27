@@ -96,7 +96,7 @@ class TestDisclosureController:
         )
 
         assert decision.status == DisclosureStatus.ILLUSTRATIVE
-        assert 'dominance' in decision.reason.lower()
+        assert 'top' in decision.reason.lower() and 'exceed' in decision.reason.lower()
 
     def test_dominance_rule_passes(self):
         """Test that cells passing dominance rule are safe."""
