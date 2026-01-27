@@ -111,21 +111,29 @@ function navigateToPage(pageId, pushState = true) {
 }
 
 /**
- * Load dashboard data from JSON
+ * Load dashboard data from JSON or embedded data
  */
 async function loadDashboardData() {
     DashboardState.isLoading = true;
     document.body.classList.add('loading');
 
     try {
-        const response = await fetch(CONFIG.dataPath);
-        if (!response.ok) {
-            throw new Error(`Failed to load data: ${response.status}`);
+        // First try to use embedded data (works for local file:// access)
+        if (typeof DASHBOARD_DATA !== 'undefined') {
+            console.log('Using embedded dashboard data');
+            DashboardState.data = DASHBOARD_DATA;
+        } else {
+            // Fall back to fetching JSON file (works on web server)
+            const response = await fetch(CONFIG.dataPath);
+            if (!response.ok) {
+                throw new Error(`Failed to load data: ${response.status}`);
+            }
+            DashboardState.data = await response.json();
+            console.log('Data loaded from JSON file');
         }
-        DashboardState.data = await response.json();
-        console.log('Data loaded:', DashboardState.data);
+        console.log('Dashboard data:', DashboardState.data);
     } catch (error) {
-        console.warn('Could not load data file, using demo data:', error.message);
+        console.warn('Could not load data, using demo data:', error.message);
         DashboardState.data = getDemoData();
     } finally {
         DashboardState.isLoading = false;
