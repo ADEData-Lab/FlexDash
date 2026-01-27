@@ -64,58 +64,44 @@ const DASHBOARD_DATA = {
   ],
   "asset_breakdown": [
     {
-      "asset_class": "battery_storage",
-      "capacity_mw": 100,
-      "capacity_mw_illustrative": true,
-      "capacity_range": "50-100 MW",
-      "capacity_range_min": 50,
-      "capacity_range_max": 100,
-      "k": 2,
-      "count": 19530,
-      "count_illustrative": false
-    },
-    {
-      "asset_class": "cold_storage",
-      "capacity_mw": 40,
-      "capacity_mw_illustrative": false,
-      "capacity_range": null,
-      "k": 4,
-      "count": 20,
-      "count_illustrative": false
-    },
-    {
-      "asset_class": "commercial_battery",
-      "capacity_mw": 80,
-      "capacity_mw_illustrative": true,
-      "capacity_range": "50-100 MW",
-      "capacity_range_min": 50,
-      "capacity_range_max": 100,
-      "k": 1,
-      "count": 10,
-      "count_illustrative": true
-    },
-    {
-      "asset_class": "ev_charger",
+      "asset_class": "ev_charging",
+      "display_name": "EV Charging",
       "capacity_mw": 4450,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
       "k": 3,
       "count": 635420,
-      "count_illustrative": false
+      "count_illustrative": false,
+      "includes": ["Smart EV chargers (domestic)"],
+      "sector": "domestic"
     },
     {
-      "asset_class": "heat_pump",
-      "capacity_mw": 0,
-      "capacity_mw_illustrative": true,
-      "capacity_range": "0 MW",
-      "capacity_range_min": 0,
-      "capacity_range_max": 0,
-      "k": 1,
-      "count": 80,
-      "count_illustrative": true
+      "asset_class": "battery_storage",
+      "display_name": "Battery Storage",
+      "capacity_mw": 180,
+      "capacity_mw_illustrative": false,
+      "capacity_range": null,
+      "k": 3,
+      "count": 19540,
+      "count_illustrative": false,
+      "includes": ["Domestic batteries", "Commercial batteries"],
+      "sector": "mixed"
     },
     {
-      "asset_class": "ic_mixed",
+      "asset_class": "ic_process_loads",
+      "display_name": "I&C Process Loads",
+      "capacity_mw": 140,
+      "capacity_mw_illustrative": false,
+      "capacity_range": null,
+      "k": 4,
+      "count": 210,
+      "count_illustrative": false,
+      "includes": ["Cold storage", "Water treatment", "Manufacturing"],
+      "sector": "ic"
+    },
+    {
+      "asset_class": "ic_aggregated",
+      "display_name": "I&C Aggregated",
       "capacity_mw": 8810,
       "capacity_mw_illustrative": true,
       "capacity_range": "5-10 GW",
@@ -123,21 +109,27 @@ const DASHBOARD_DATA = {
       "capacity_range_max": 10000,
       "k": 2,
       "count": 270,
-      "count_illustrative": true
+      "count_illustrative": true,
+      "includes": ["Mixed I&C portfolios from aggregators"],
+      "sector": "ic"
     },
     {
-      "asset_class": "manufacturing",
-      "capacity_mw": 70,
+      "asset_class": "heat_pumps",
+      "display_name": "Heat Pumps",
+      "capacity_mw": 0,
       "capacity_mw_illustrative": true,
-      "capacity_range": "50-100 MW",
-      "capacity_range_min": 50,
-      "capacity_range_max": 100,
+      "capacity_range": "<10 MW",
+      "capacity_range_min": 0,
+      "capacity_range_max": 10,
       "k": 1,
-      "count": 100,
-      "count_illustrative": true
+      "count": 80,
+      "count_illustrative": true,
+      "includes": ["ASHP", "GSHP"],
+      "sector": "domestic"
     },
     {
-      "asset_class": "other",
+      "asset_class": "other_domestic",
+      "display_name": "Other Domestic",
       "capacity_mw": 180,
       "capacity_mw_illustrative": true,
       "capacity_range": "100-250 MW",
@@ -145,18 +137,9 @@ const DASHBOARD_DATA = {
       "capacity_range_max": 250,
       "k": 1,
       "count": 36400,
-      "count_illustrative": true
-    },
-    {
-      "asset_class": "water_treatment",
-      "capacity_mw": 30,
-      "capacity_mw_illustrative": true,
-      "capacity_range": "10-50 MW",
-      "capacity_range_min": 10,
-      "capacity_range_max": 50,
-      "k": 1,
-      "count": 90,
-      "count_illustrative": true
+      "count_illustrative": true,
+      "includes": ["Smart appliances", "Other flexible loads"],
+      "sector": "domestic"
     }
   ],
   "service_breakdown": [],

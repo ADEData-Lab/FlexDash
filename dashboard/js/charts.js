@@ -143,7 +143,7 @@ function createSectorChart(data) {
 }
 
 /**
- * Create asset class horizontal bar chart with range support
+ * Create asset class horizontal bar chart with range support and log scale
  */
 function createAssetChart(data) {
     const ctx = document.getElementById('asset-chart');
@@ -160,24 +160,31 @@ function createAssetChart(data) {
         return bVal - aVal;
     });
 
-    // For illustrative data, use midpoint of range for display
+    // Use display_name if available, otherwise format asset_class
     const labels = sorted.map(d => {
-        let label = formatLabelLocal(d.asset_class);
+        let label = d.display_name || formatLabelLocal(d.asset_class);
         if (d.capacity_mw_illustrative && d.capacity_range) {
             label += ` [${d.capacity_range}]`;
         }
         return label;
     });
 
+    // For chart display, use actual value or midpoint of range
+    // Add small offset for log scale (can't have 0)
     const values = sorted.map(d => {
+        let val;
         if (d.capacity_mw_illustrative && d.capacity_range_max) {
-            return (d.capacity_range_min + d.capacity_range_max) / 2;
+            val = (d.capacity_range_min + d.capacity_range_max) / 2;
+        } else {
+            val = d.capacity_mw;
         }
-        return d.capacity_mw;
+        return Math.max(val, 1); // Minimum 1 for log scale
     });
 
     const illustrativeFlags = sorted.map(d => d.capacity_mw_illustrative);
     const ranges = sorted.map(d => d.capacity_range);
+    const includes = sorted.map(d => d.includes || []);
+    const kValues = sorted.map(d => d.k);
 
     // Color bars based on illustrative status
     const colors = sorted.map((d, i) =>
@@ -205,24 +212,52 @@ function createAssetChart(data) {
                 tooltip: {
                     ...CHART_DEFAULTS.plugins.tooltip,
                     callbacks: {
+                        title: function(context) {
+                            const idx = context[0].dataIndex;
+                            const name = sorted[idx].display_name || formatLabelLocal(sorted[idx].asset_class);
+                            return name;
+                        },
                         label: function(context) {
-                            const isIllustrative = illustrativeFlags[context.dataIndex];
-                            const range = ranges[context.dataIndex];
+                            const idx = context.dataIndex;
+                            const isIllustrative = illustrativeFlags[idx];
+                            const range = ranges[idx];
+                            const k = kValues[idx];
 
                             if (isIllustrative && range) {
-                                return `Range: ${range} (k<3 contributors)`;
+                                return `Range: ${range} (k=${k})`;
                             }
-                            return `${new Intl.NumberFormat('en-GB').format(context.parsed.x)} MW`;
+                            return `${new Intl.NumberFormat('en-GB').format(sorted[idx].capacity_mw)} MW (k=${k})`;
+                        },
+                        afterLabel: function(context) {
+                            const idx = context.dataIndex;
+                            const inc = includes[idx];
+                            if (inc && inc.length > 0) {
+                                return 'Includes: ' + inc.join(', ');
+                            }
+                            return '';
                         }
                     }
                 }
             },
             scales: {
                 x: {
-                    beginAtZero: true,
+                    type: 'logarithmic',
+                    min: 1,
+                    max: 20000,
                     grid: { color: 'rgba(0,0,0,0.05)' },
                     ticks: {
-                        callback: value => new Intl.NumberFormat('en-GB').format(value)
+                        callback: function(value) {
+                            if (value === 1) return '1';
+                            if (value === 10) return '10';
+                            if (value === 100) return '100';
+                            if (value === 1000) return '1,000';
+                            if (value === 10000) return '10,000';
+                            return '';
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Capacity (MW) - Log Scale'
                     }
                 },
                 y: {
@@ -232,11 +267,10 @@ function createAssetChart(data) {
         }
     });
 
-    // Update note
-    const hasIllustrative = illustrativeFlags.some(f => f);
+    // Update note with legend
     const noteEl = document.getElementById('asset-note');
-    if (noteEl && hasIllustrative) {
-        noteEl.textContent = 'Orange bars show range estimates (k<3 contributors). Bar height shows range midpoint.';
+    if (noteEl) {
+        noteEl.innerHTML = '<strong>Blue/green bars:</strong> Real data (k\u22653) &nbsp; <strong style="color:#FF9800">Orange bars:</strong> Range estimates (k<3)';
     }
 
     if (!window.DashboardState.charts.overview) {
@@ -254,24 +288,38 @@ function createDomesticAssetChart(data) {
 
     const assetData = data.asset_breakdown || [];
 
-    // Filter to domestic assets
-    const domesticAssets = ['ev_charger', 'heat_pump', 'battery_storage', 'smart_hot_water', 'wet_appliances'];
+    // Filter to domestic assets (by sector or asset class)
     const filtered = assetData.filter(d =>
-        domesticAssets.includes(d.asset_class?.toLowerCase())
+        d.sector === 'domestic' || d.sector === 'mixed' ||
+        ['ev_charging', 'heat_pumps', 'battery_storage', 'other_domestic'].includes(d.asset_class)
     );
 
-    if (filtered.length === 0) {
-        // Use placeholder data
-        filtered.push(
-            { asset_class: 'ev_charger', capacity_mw: 650, capacity_mw_illustrative: false },
-            { asset_class: 'heat_pump', capacity_mw: 350, capacity_mw_illustrative: true },
-            { asset_class: 'battery_storage', capacity_mw: 200, capacity_mw_illustrative: false }
-        );
-    }
+    if (filtered.length === 0) return;
 
-    const sorted = [...filtered].sort((a, b) => b.capacity_mw - a.capacity_mw);
-    const labels = sorted.map(d => formatLabelLocal(d.asset_class));
-    const values = sorted.map(d => d.capacity_mw);
+    // Sort by capacity, using midpoint for ranges
+    const sorted = [...filtered].sort((a, b) => {
+        const aVal = a.capacity_mw_illustrative && a.capacity_range_max ?
+            (a.capacity_range_min + a.capacity_range_max) / 2 : a.capacity_mw;
+        const bVal = b.capacity_mw_illustrative && b.capacity_range_max ?
+            (b.capacity_range_min + b.capacity_range_max) / 2 : b.capacity_mw;
+        return bVal - aVal;
+    });
+
+    const labels = sorted.map(d => {
+        let label = d.display_name || formatLabelLocal(d.asset_class);
+        if (d.capacity_mw_illustrative && d.capacity_range) {
+            label += ` [${d.capacity_range}]`;
+        }
+        return label;
+    });
+
+    const values = sorted.map(d => {
+        if (d.capacity_mw_illustrative && d.capacity_range_max) {
+            return Math.max((d.capacity_range_min + d.capacity_range_max) / 2, 1);
+        }
+        return Math.max(d.capacity_mw, 1);
+    });
+
     const colors = sorted.map((d, i) =>
         d.capacity_mw_illustrative ? CHART_COLORS.illustrative : CHART_COLORS.palette[i % CHART_COLORS.palette.length]
     );
@@ -291,15 +339,34 @@ function createDomesticAssetChart(data) {
             ...CHART_DEFAULTS,
             plugins: {
                 ...CHART_DEFAULTS.plugins,
-                legend: { display: false }
+                legend: { display: false },
+                tooltip: {
+                    ...CHART_DEFAULTS.plugins.tooltip,
+                    callbacks: {
+                        label: function(context) {
+                            const d = sorted[context.dataIndex];
+                            if (d.capacity_mw_illustrative && d.capacity_range) {
+                                return `Range: ${d.capacity_range} (k=${d.k})`;
+                            }
+                            return `${new Intl.NumberFormat('en-GB').format(d.capacity_mw)} MW (k=${d.k})`;
+                        }
+                    }
+                }
             },
             scales: {
                 y: {
-                    beginAtZero: true,
+                    type: 'logarithmic',
+                    min: 1,
                     grid: { color: 'rgba(0,0,0,0.05)' },
                     ticks: {
-                        callback: value => new Intl.NumberFormat('en-GB').format(value)
-                    }
+                        callback: function(value) {
+                            if ([1, 10, 100, 1000, 10000].includes(value)) {
+                                return new Intl.NumberFormat('en-GB').format(value);
+                            }
+                            return '';
+                        }
+                    },
+                    title: { display: true, text: 'MW (log scale)' }
                 },
                 x: {
                     grid: { display: false }
@@ -323,24 +390,38 @@ function createICAssetChart(data) {
 
     const assetData = data.asset_breakdown || [];
 
-    // Filter to I&C assets
-    const icAssets = ['cold_storage', 'water_treatment', 'manufacturing', 'commercial_hvac', 'commercial_battery', 'backup_generation', 'ev_fleet'];
+    // Filter to I&C assets (by sector or asset class)
     const filtered = assetData.filter(d =>
-        icAssets.includes(d.asset_class?.toLowerCase())
+        d.sector === 'ic' ||
+        ['ic_process_loads', 'ic_aggregated'].includes(d.asset_class)
     );
 
-    if (filtered.length === 0) {
-        // Use placeholder data
-        filtered.push(
-            { asset_class: 'cold_storage', capacity_mw: 480, capacity_mw_illustrative: false },
-            { asset_class: 'water_treatment', capacity_mw: 420, capacity_mw_illustrative: true },
-            { asset_class: 'manufacturing', capacity_mw: 350, capacity_mw_illustrative: false }
-        );
-    }
+    if (filtered.length === 0) return;
 
-    const sorted = [...filtered].sort((a, b) => b.capacity_mw - a.capacity_mw);
-    const labels = sorted.map(d => formatLabelLocal(d.asset_class));
-    const values = sorted.map(d => d.capacity_mw);
+    // Sort by capacity, using midpoint for ranges
+    const sorted = [...filtered].sort((a, b) => {
+        const aVal = a.capacity_mw_illustrative && a.capacity_range_max ?
+            (a.capacity_range_min + a.capacity_range_max) / 2 : a.capacity_mw;
+        const bVal = b.capacity_mw_illustrative && b.capacity_range_max ?
+            (b.capacity_range_min + b.capacity_range_max) / 2 : b.capacity_mw;
+        return bVal - aVal;
+    });
+
+    const labels = sorted.map(d => {
+        let label = d.display_name || formatLabelLocal(d.asset_class);
+        if (d.capacity_mw_illustrative && d.capacity_range) {
+            label += ` [${d.capacity_range}]`;
+        }
+        return label;
+    });
+
+    const values = sorted.map(d => {
+        if (d.capacity_mw_illustrative && d.capacity_range_max) {
+            return Math.max((d.capacity_range_min + d.capacity_range_max) / 2, 1);
+        }
+        return Math.max(d.capacity_mw, 1);
+    });
+
     const colors = sorted.map((d, i) =>
         d.capacity_mw_illustrative ? CHART_COLORS.illustrative : CHART_COLORS.palette[i % CHART_COLORS.palette.length]
     );
@@ -360,15 +441,41 @@ function createICAssetChart(data) {
             ...CHART_DEFAULTS,
             plugins: {
                 ...CHART_DEFAULTS.plugins,
-                legend: { display: false }
+                legend: { display: false },
+                tooltip: {
+                    ...CHART_DEFAULTS.plugins.tooltip,
+                    callbacks: {
+                        label: function(context) {
+                            const d = sorted[context.dataIndex];
+                            if (d.capacity_mw_illustrative && d.capacity_range) {
+                                return `Range: ${d.capacity_range} (k=${d.k})`;
+                            }
+                            return `${new Intl.NumberFormat('en-GB').format(d.capacity_mw)} MW (k=${d.k})`;
+                        },
+                        afterLabel: function(context) {
+                            const d = sorted[context.dataIndex];
+                            if (d.includes && d.includes.length > 0) {
+                                return 'Includes: ' + d.includes.join(', ');
+                            }
+                            return '';
+                        }
+                    }
+                }
             },
             scales: {
                 y: {
-                    beginAtZero: true,
+                    type: 'logarithmic',
+                    min: 1,
                     grid: { color: 'rgba(0,0,0,0.05)' },
                     ticks: {
-                        callback: value => new Intl.NumberFormat('en-GB').format(value)
-                    }
+                        callback: function(value) {
+                            if ([1, 10, 100, 1000, 10000].includes(value)) {
+                                return new Intl.NumberFormat('en-GB').format(value);
+                            }
+                            return '';
+                        }
+                    },
+                    title: { display: true, text: 'MW (log scale)' }
                 },
                 x: {
                     grid: { display: false }
