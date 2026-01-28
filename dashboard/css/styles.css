@@ -604,6 +604,73 @@ body {
     font-size: 0.9rem;
 }
 
+/* Target Comparison (2030 Target Card) */
+.target-comparison {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.target-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.target-row:last-child {
+    border-bottom: none;
+}
+
+.target-row.dashboard-row {
+    background: #f0f9ff;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border-bottom: none;
+}
+
+.target-label {
+    font-weight: 500;
+    color: #666;
+    min-width: 100px;
+    font-size: 0.85rem;
+}
+
+.target-value {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--primary-color, #c41230);
+}
+
+.target-row.dashboard-row .target-value {
+    color: var(--accent-color, #45c3d3);
+}
+
+.target-metric {
+    color: #888;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+.comparison-caveat {
+    background: #fff8e1;
+    border-left: 3px solid #ffc107;
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #5d4037;
+}
+
+.comparison-caveat strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #333;
+}
+
 /* Progress Bar */
 .progress-bar-container {
     background: var(--progress-track-bg, #e0e0e0);
