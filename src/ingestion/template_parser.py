@@ -224,45 +224,99 @@ class TemplateParser:
         )
 
     def _parse_cub(self, filepath: Path, contributor_id: str) -> ParsedData:
-        """Parse C-U-B CLF data format."""
+        """Parse C-U-B CLF data format.
+
+        C-U-B uses a custom horizontal layout:
+        - Part 2 (cols 12-18): Asset portfolio data
+        - Part 3 (cols 6-9): Flex MWh data (turn-up/turn-down)
+
+        Note: They provided MWh energy values but no MW capacity.
+        We extract asset counts and flag capacity as needing clarification.
+        """
         logger.info("Using C-U-B custom parser")
+
+        warnings = []
+        errors = []
 
         try:
             df = pd.read_excel(filepath, sheet_name=0, header=None)
 
-            # Extract any recognizable data
             assets = []
 
-            # Look for patterns in the data
-            for idx, row in df.iterrows():
-                for col_idx, val in enumerate(row):
-                    if isinstance(val, (int, float)) and not pd.isna(val) and 0 < val < 10000:
-                        # Check if there's a label nearby
-                        label = df.iloc[idx, 0] if col_idx > 0 else 'unknown'
-                        if pd.notna(label):
-                            assets.append({
-                                'asset_class': 'ic_mixed',
-                                'sector': 'ic',
-                                'count': 1,
-                                'capacity_mw': float(val)
-                            })
-                            break
+            # Part 2: Look for I&C BESS row (row 20, cols 12-18)
+            # Structure: [12]=Sector, [13]=Asset, [15]=Count, [16]=Market%, [17]=WinterCount
+            try:
+                # Find I&C BESS row - search for 'I&C' in column 12 and 'BESS' in column 13
+                for idx in range(15, 35):
+                    col12 = df.iloc[idx, 12] if idx < len(df) else None
+                    col13 = df.iloc[idx, 13] if idx < len(df) else None
 
-            # Deduplicate and aggregate
+                    if pd.notna(col12) and 'I&C' in str(col12):
+                        # Found I&C section
+                        if pd.notna(col13) and 'BESS' in str(col13):
+                            count = df.iloc[idx, 15]  # No. in portfolio
+                            market_share = df.iloc[idx, 16]  # Market share %
+                            winter_count = df.iloc[idx, 17]  # Used in winter
+
+                            if pd.notna(count) and float(count) > 0:
+                                assets.append({
+                                    'asset_class': 'battery',
+                                    'sector': 'ic',
+                                    'count': int(float(count)),
+                                    'market_share_pct': float(market_share) if pd.notna(market_share) else None,
+                                    'winter_active_count': int(float(winter_count)) if pd.notna(winter_count) else None,
+                                    'capacity_mw': None  # Not provided - needs clarification
+                                })
+                                logger.info(f"C-U-B: Found I&C BESS with {count} assets")
+                                break
+            except Exception as e:
+                logger.warning(f"C-U-B Part 2 parse error: {e}")
+
+            # Part 3: Look for flex MWh data (rows 40-50, cols 6-9)
+            # Structure: [6]=Available Turn-up, [7]=Available Turn-down, [8]=Delivered Turn-up, [9]=Delivered Turn-down
+            energy_mwh = {}
+            try:
+                for idx in range(40, 55):
+                    col1 = df.iloc[idx, 1] if idx < len(df) else None
+                    col2 = df.iloc[idx, 2] if idx < len(df) else None
+
+                    # Look for I&C BESS row
+                    if pd.notna(col1) and 'I&C' in str(col1):
+                        if pd.notna(col2) and 'BESS' in str(col2):
+                            avail_up = df.iloc[idx, 6]
+                            avail_down = df.iloc[idx, 7]
+                            deliv_up = df.iloc[idx, 8]
+                            deliv_down = df.iloc[idx, 9]
+
+                            energy_mwh = {
+                                'available_turn_up_mwh': float(avail_up) if pd.notna(avail_up) else 0,
+                                'available_turn_down_mwh': float(avail_down) if pd.notna(avail_down) else 0,
+                                'delivered_turn_up_mwh': float(deliv_up) if pd.notna(deliv_up) else 0,
+                                'delivered_turn_down_mwh': float(deliv_down) if pd.notna(deliv_down) else 0
+                            }
+                            logger.info(f"C-U-B: Found flex data - Available down: {energy_mwh['available_turn_down_mwh']} MWh")
+                            break
+            except Exception as e:
+                logger.warning(f"C-U-B Part 3 parse error: {e}")
+
+            # Create assets DataFrame
             if assets:
-                total_mw = sum(a['capacity_mw'] for a in assets[:5])  # Take first few values
-                assets_df = pd.DataFrame([{
-                    'asset_class': 'ic_mixed',
-                    'sector': 'ic',
-                    'count': len(assets),
-                    'capacity_mw': total_mw
-                }])
+                # Add energy data to first asset
+                if energy_mwh:
+                    assets[0].update(energy_mwh)
+                assets_df = pd.DataFrame(assets)
+
+                # Add warning about missing MW capacity
+                warnings.append("C-U-B provided MWh energy values but no MW capacity - clarification requested")
+                warnings.append(f"Extracted: {assets[0].get('count', 0)} I&C BESS assets, {energy_mwh.get('available_turn_down_mwh', 0)} MWh available turn-down")
             else:
                 assets_df = pd.DataFrame()
+                errors.append("Could not extract asset data from C-U-B custom format")
 
         except Exception as e:
             logger.warning(f"C-U-B parse error: {e}")
             assets_df = pd.DataFrame()
+            errors.append(f"Parse error: {str(e)}")
 
         return ParsedData(
             contributor_id=contributor_id,
@@ -273,9 +327,13 @@ class TemplateParser:
             assets=assets_df,
             events=pd.DataFrame(),
             services=pd.DataFrame(),
-            metadata={'format': 'cub_clf'},
-            parse_warnings=["C-U-B data requires manual review"],
-            parse_errors=[]
+            metadata={
+                'format': 'cub_clf',
+                'capacity_mw_missing': True,
+                'energy_mwh_provided': bool(energy_mwh) if 'energy_mwh' in dir() else False
+            },
+            parse_warnings=warnings or ["C-U-B data requires manual review"],
+            parse_errors=errors
         )
 
     def _parse_axle(self, filepath: Path, contributor_id: str) -> ParsedData:

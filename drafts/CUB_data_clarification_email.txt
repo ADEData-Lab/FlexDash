@@ -1,0 +1,40 @@
+Subject: ADE Flex Dashboard - Data Clarification Request (C-U-B CLF)
+
+Dear [Contact Name],
+
+Thank you for submitting your data to the ADE Flex Dashboard project. We've received and processed your submission (C-U-B CLF Data Sheet.xlsx) and successfully extracted the following information:
+
+EXTRACTED DATA:
+- Company: CUB (UK) LTD
+- Company Type: Aggregator
+- Asset Class: I&C Battery Energy Storage Systems (BESS)
+- Number of Assets in Portfolio: 39
+- Market Share: 1%
+- Assets Used in Winter 2024-25: 25
+- Available Flexibility (Turn-down): 2 MWh
+- Delivered Flexibility (Turn-down): 1 MWh
+
+CLARIFICATION NEEDED:
+
+We noticed that your submission includes energy values (MWh) but is missing capacity values (MW). To include your data in the dashboard's capacity metrics, we would need:
+
+1. **Average Daily Peak Deliverable Capacity (MW)** for your I&C BESS portfolio
+   - This is the maximum simultaneously deliverable capacity across all assets
+   - Please provide both turn-up and turn-down values if different
+
+2. For reference, the template (Section 3.2) asks for:
+   "The average of your daily coincident, deduplicated, peak deliverable capacity (MW). For each day, take the maximum simultaneously deliverable capacity across all assets (after accounting for participation in multiple markets, and availability factors), then average those daily values over Nov-Feb."
+
+If you have this data available, please reply to this email with the MW capacity figures, or complete Section 3.2 of the attached data template.
+
+Your data remains valuable - the asset counts and energy delivery figures have been incorporated. Adding capacity data would enable us to include C-U-B in the headline MW metrics.
+
+Please don't hesitate to reach out if you have any questions about the data requirements.
+
+Best regards,
+
+[Your Name]
+ADE Flex Dashboard Project Team
+
+---
+Attachment: Data Template V1.2.xlsx (for reference)
