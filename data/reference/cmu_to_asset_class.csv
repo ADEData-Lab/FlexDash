@@ -1,0 +1,5 @@
+technology_pattern,asset_class
+(?i).*\\bdsr\\b.*,"I&C load"
+(?i).*demand.*side.*response.*,"I&C load"
+(?i).*\\bstorage\\b.*,"Battery"
+(?i).*\\bbattery\\b.*,"Battery"

@@ -1,0 +1,164 @@
+﻿# FlexDash Asset Taxonomy
+#
+# Standardised classification of flexible assets aligned with
+# ADE methodology and industry standards.
+
+# Version control
+version: "1.0"
+effective_date: "2025-01-01"
+source: "Final_Comprehensive_Flexible_Asset_List.xlsx"
+
+# Sector definitions
+sectors:
+  domestic:
+    name: "Domestic"
+    description: "Residential flexibility assets"
+
+  ic:
+    name: "Industrial & Commercial"
+    description: "Non-domestic flexibility assets"
+
+# Asset classes by sector
+asset_classes:
+  # Domestic asset classes
+  domestic:
+    ev_charger:
+      name: "Electric Vehicle Charger"
+      abbreviation: "EV"
+      description: "Smart EV charging points at residential properties"
+      typical_capacity_kw: [3.6, 7.4, 22]
+      flexibility_mechanism: "demand_shift"
+
+    heat_pump:
+      name: "Heat Pump"
+      abbreviation: "HP"
+      description: "Air source and ground source heat pumps"
+      typical_capacity_kw: [3, 5, 12]
+      flexibility_mechanism: "demand_shift"
+
+    battery_storage:
+      name: "Battery Energy Storage"
+      abbreviation: "BESS"
+      description: "Behind-the-meter battery systems"
+      typical_capacity_kw: [3, 5, 13.5]
+      flexibility_mechanism: "storage"
+
+    smart_hot_water:
+      name: "Smart Hot Water"
+      abbreviation: "HW"
+      description: "Immersion heaters and hot water tanks"
+      typical_capacity_kw: [2, 3]
+      flexibility_mechanism: "demand_shift"
+
+    wet_appliances:
+      name: "Wet Appliances"
+      abbreviation: "WET"
+      description: "Smart washing machines, dishwashers, tumble dryers"
+      typical_capacity_kw: [0.5, 2]
+      flexibility_mechanism: "demand_shift"
+
+  # I&C asset classes
+  ic:
+    cold_storage:
+      name: "Cold Storage"
+      abbreviation: "COLD"
+      description: "Refrigeration and cold chain facilities"
+      typical_capacity_kw: [50, 500, 2000]
+      flexibility_mechanism: "demand_shift"
+
+    water_treatment:
+      name: "Water Treatment"
+      abbreviation: "WATER"
+      description: "Water and wastewater treatment plants"
+      typical_capacity_kw: [100, 1000, 5000]
+      flexibility_mechanism: "demand_shift"
+
+    manufacturing:
+      name: "Manufacturing Process"
+      abbreviation: "MFG"
+      description: "Industrial manufacturing loads"
+      typical_capacity_kw: [100, 1000, 10000]
+      flexibility_mechanism: "demand_reduction"
+
+    commercial_hvac:
+      name: "Commercial HVAC"
+      abbreviation: "HVAC"
+      description: "Commercial heating, ventilation, air conditioning"
+      typical_capacity_kw: [20, 200, 2000]
+      flexibility_mechanism: "demand_shift"
+
+    commercial_battery:
+      name: "Commercial Battery Storage"
+      abbreviation: "C-BESS"
+      description: "Commercial and industrial battery systems"
+      typical_capacity_kw: [50, 500, 5000]
+      flexibility_mechanism: "storage"
+
+    backup_generation:
+      name: "Backup Generation"
+      abbreviation: "GEN"
+      description: "Diesel/gas generators providing flex services"
+      typical_capacity_kw: [100, 500, 5000]
+      flexibility_mechanism: "generation"
+
+    ev_fleet:
+      name: "EV Fleet"
+      abbreviation: "FLEET"
+      description: "Commercial EV charging depots"
+      typical_capacity_kw: [50, 500, 2000]
+      flexibility_mechanism: "demand_shift"
+
+# Flexibility service types
+service_types:
+  frequency_response:
+    name: "Frequency Response"
+    abbreviation: "FR"
+    products:
+      - "Dynamic Containment"
+      - "Dynamic Moderation"
+      - "Dynamic Regulation"
+      - "FFR"
+
+  capacity_market:
+    name: "Capacity Market"
+    abbreviation: "CM"
+    products:
+      - "T-1"
+      - "T-4"
+
+  balancing_mechanism:
+    name: "Balancing Mechanism"
+    abbreviation: "BM"
+    products:
+      - "BOA"
+
+  dso_flexibility:
+    name: "DSO Flexibility"
+    abbreviation: "DSO"
+    products:
+      - "Sustain"
+      - "Secure"
+      - "Dynamic"
+
+  tou_tariff:
+    name: "Time-of-Use Tariff"
+    abbreviation: "TOU"
+    products:
+
+# Mapping from raw data terms to taxonomy
+field_mappings:
+  asset_type:
+    "Electric Vehicle": "ev_charger"
+    "EV": "ev_charger"
+    "EV Charger": "ev_charger"
+    "Heat Pump": "heat_pump"
+    "HP": "heat_pump"
+    "ASHP": "heat_pump"
+    "Battery": "battery_storage"
+    "BESS": "battery_storage"
+    "Home Battery": "battery_storage"
+    "Hot Water": "smart_hot_water"
+    "Immersion": "smart_hot_water"
+    "Cold Store": "cold_storage"
+    "Refrigeration": "cold_storage"
+    "Water Treatment": "water_treatment"

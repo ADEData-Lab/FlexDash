@@ -1,0 +1,34 @@
+# Verification configuration (Capacity Market benchmark)
+#
+# This config controls the external benchmark layer used for sense-checking
+# dashboard contributor totals. Benchmarks are never added to dashboard totals.
+
+benchmark:
+  dy: "2024/25"
+  unit: "kW"
+  include_storage_default: false
+  input_files:
+    t1_appendix_a: "data/external/cm/T1_DY2024_25_AppendixA.xlsx"
+    t4_appendix_a: "data/external/cm/T4_DY2024_25_AppendixA.xlsx"
+
+privacy:
+  k_threshold: 3
+
+sources:
+  - name: "EMR Capacity Auction Results (index)"
+    url: "https://www.emrdbcapacityauction.com/"
+  - name: "T-1 Auction 2023 (DY 2024/25): Final Results Report (v1.0)"
+    url: "https://www.emrdeliverybody.com/Capacity%20Markets%20Document%20Library/T-1%20DY%202024-25%20Final%20Results%20Report%20v1.0.pdf"
+  - name: "T-4 Auction 2020 (DY 2024/25): Final Report"
+    url: "https://www.emrdeliverybody.com/Capacity%20Markets%20Document%20Library/Capacity%20Market%20Auction%20T4%20DY2024-25%20Final%20Report.pdf"
+  - name: "NESO Capacity Market portal"
+    url: "https://www.neso.energy/what-we-do/energy-markets/electricity-market-reform-emr-delivery-body/capacity-market-portal"
+  - name: "Ofgem: Decision on the Delivery Body review of the Relevant Balancing Services Guidelines (2024)"
+    url: "https://www.ofgem.gov.uk/sites/default/files/2024-03/Decision%20on%20the%20Delivery%20Body%27s%20review%20of%20the%20Relevant%20Balancing%20Services%20Guidelines%202024.pdf"
+
+copy:
+  non_additivity_notice: "Capacity Market figures are used as an external benchmark only and are not added to dashboard totals."
+  methods_summary: |
+    Capacity Market values represent de-rated capacity awards for CMUs in Delivery Year 2024/25 (union of T-4 and T-1 auctions, summed where the same CMU appears in both).
+    Dashboard contributor figures reflect the project study period Nov 2024–Feb 2025 and follow the dashboard working capacity definition.
+    Expect differences due to (i) definitions (de-rated MW vs working capacity), (ii) period coverage (Delivery Year vs Nov–Feb), (iii) overlaps across services (double counting not inferred), and (iv) contributor coverage (domestic under-represented in CM).

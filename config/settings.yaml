@@ -1,0 +1,63 @@
+# FlexDash Configuration Settings
+
+# Project metadata
+project:
+  name: "ADE Flex Dashboard"
+  version: "1.0.0"
+  phase: "Phase 1"
+  study_period: "Nov 2024-Feb 2025"
+
+# File paths
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  anonymised_data: "data/anonymised"
+  audit_logs: "data/audit"
+  dashboard_data: "dashboard/data"
+
+# Data source directory (relative to project root)
+source_data: "../02 DATA RECEIVED"
+
+# Data template settings
+templates:
+  version: "V1.2"
+  expected_sheets:
+    - "Metadata"
+    - "Asset Portfolio"
+    - "Flexibility Events"
+    - "Service Participation"
+
+# Disclosure control settings
+disclosure:
+  k_threshold: 3                    # Minimum contributors per cell
+  rounding_precision: 10            # Round to nearest 10 MW/MWh
+  minimum_cell_size: 3              # Suppress cells with <3 contributors
+  geographic_max_granularity: "dso" # No site-level data
+
+# Data quality thresholds
+quality:
+  minimum_completeness: 0.5         # 50% fields required
+  outlier_threshold_iqr: 3.0        # 3x IQR for outlier detection
+  date_format: "%Y-%m-%d"
+
+# Dashboard settings
+dashboard:
+  title: "GB Flexibility Dashboard"
+  subtitle: "Phase 1 - Baseline Assessment"
+  refresh_date_format: "%d %B %Y"
+  default_sector: "all"
+
+# Sectors
+sectors:
+  - id: "domestic"
+    name: "Domestic"
+    color: "#2E86AB"
+  - id: "ic"
+    name: "Industrial & Commercial"
+    color: "#A23B72"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  audit_file: "data/audit/pipeline_audit.jsonl"

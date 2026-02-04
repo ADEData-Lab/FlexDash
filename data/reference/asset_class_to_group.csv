@@ -1,0 +1,17 @@
+asset_class,asset_group
+ev_charger,EV charging
+ev_fleet,EV charging
+heat_pump,Heat
+heat_network_thermal,Heat
+storage_heater,Heat
+smart_hot_water,Heat
+commercial_hvac,Heat
+battery_storage,Battery storage
+commercial_battery,Battery storage
+battery,Battery storage
+cold_storage,I&C load/process
+water_treatment,I&C load/process
+manufacturing,I&C load/process
+industrial_load,I&C load/process
+ic_mixed,I&C load/process
+other,Other

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dashboard-dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GB Flexibility Dashboard | ADE</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/ade-brand.css">
+    <script src="js/vendor/chart.umd.min.js"></script>
+    <script>
+      // Fallback if the local vendor bundle is missing.
+      if (typeof Chart === 'undefined') {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+        document.head.appendChild(s);
+      }
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <img src="ADE Demand Logo.png" alt="ADE Demand" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="logo-fallback" style="display:none;">
+                    <span class="logo-text">ade</span>
+                    <span class="logo-text-bold">Demand</span>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="#overview" class="nav-link active" data-page="overview">Overview</a>
+                <a href="#domestic" class="nav-link" data-page="domestic">Domestic</a>
+                <a href="#ic" class="nav-link" data-page="ic">I&C</a>
+                <a href="#benchmarks" class="nav-link" data-page="benchmarks">Benchmarks</a>
+                <a href="#projections" class="nav-link" data-page="projections">Projections</a>
+                <a href="#methodology" class="nav-link" data-page="methodology">Methodology</a>
+            </nav>
+            <div class="theme-selector">
+                <label for="theme-select">Theme:</label>
+                <select id="theme-select">
+                    <option value="energy-flow">Energy Flow</option>
+                    <option value="data-grid">Data Grid</option>
+                    <option value="bold-blocks">Bold Blocks</option>
+                    <option value="light-airy">Light & Airy</option>
+                    <option value="dashboard-dark">Dark Mode</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Page: Overview -->
+        <section id="overview" class="page active">
+            <div class="page-header">
+                <h1>GB Flexibility Dashboard</h1>
+                <p class="subtitle">Phase 1 Baseline Assessment</p>
+                <div class="study-badge">
+                    <span class="badge-label">Study Period:</span>
+                    <span class="badge-value" id="study-period">Nov 2024–Feb 2025</span>
+                </div>
+            </div>
+
+            <!-- Headline Metrics - Capacity (GW) -->
+            <div class="metrics-section">
+                <h3 class="section-title">Capacity (GW)</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card primary">
+                        <div class="metric-icon">⚡</div>
+                        <div class="metric-value" id="total-available">--</div>
+                        <div class="metric-label">Total Available (MW)</div>
+                        <div class="metric-badge" id="total-available-badge"></div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Delivered MW is based on contributor-reported delivered values in the template (section 3.2). Where disclosure rules apply, a range is shown.">
+                        <div class="metric-icon">📊</div>
+                        <div class="metric-value" id="total-delivered">--</div>
+                        <div class="metric-label">Total Delivered (MW)</div>
+                        <div class="metric-badge" id="total-delivered-badge"></div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Utilisation is derived from the ratio of delivered MW to available MW using the same contributor subset (template section 3.2).">
+                        <div class="metric-icon">📈</div>
+                        <div class="metric-value" id="utilisation-rate">--</div>
+                        <div class="metric-label">Utilisation Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">🏢</div>
+                        <div class="metric-value" id="contributor-count">--</div>
+                        <div class="metric-label">Data Contributors</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Coverage (contributors) -->
+            <div class="metrics-section">
+                <h3 class="section-title">Data coverage (contributors)</h3>
+                <div class="metrics-grid metrics-grid-4">
+                    <div class="metric-card has-tooltip" data-tooltip="Contributors who supplied MW capacity in Template section 3.2.">
+                        <div class="metric-value" id="coverage-capacity-mw">--</div>
+                        <div class="metric-label">MW capacity (Part 3.2)</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Contributors who supplied delivered MW in Template section 3.2 (delivered turn-up/turn-down).">
+                        <div class="metric-value" id="coverage-delivered-mw">--</div>
+                        <div class="metric-label">Delivered MW (Part 3.2)</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Contributors who supplied delivered energy (MWh) in Template section 3.1.">
+                        <div class="metric-value" id="coverage-explicit-energy">--</div>
+                        <div class="metric-label">Explicit energy (Part 3.1)</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Contributors who supplied Time-of-Use (implicit) energy totals in Part 4.">
+                        <div class="metric-value" id="coverage-implicit-energy">--</div>
+                        <div class="metric-label">Implicit energy (Part 4)</div>
+                    </div>
+                </div>
+                <p class="chart-note" id="coverage-note">Where fewer than 3 contributors supply a metric, values are shown as ranges to protect confidentiality.</p>
+            </div>
+
+            <!-- Energy Metrics (GWh) - Methodology v7 -->
+            <div class="metrics-section">
+                <h3 class="section-title">Energy (GWh)</h3>
+                <div class="metrics-grid metrics-grid-3">
+                    <div class="metric-card has-tooltip" data-tooltip="Total delivered energy flexibility from contributor data (k>=3).">
+                        <div class="metric-icon">🔋</div>
+                        <div class="metric-value" id="total-delivered-gwh">~650</div>
+                        <div class="metric-label">Total Delivered (GWh)</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Range estimate - explicit managed contracts. Uses range due to k<3 contributors for this dimension.">
+                        <div class="metric-icon">📤</div>
+                        <div class="metric-value illustrative-value" id="explicit-gwh">250-750</div>
+                        <div class="metric-label">Explicit/Managed (GWh)</div>
+                        <div class="metric-badge illustrative">Range</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Range estimate - ToU behavioral response. Uses range due to k<3 contributors for this dimension.">
+                        <div class="metric-icon">📥</div>
+                        <div class="metric-value illustrative-value" id="implicit-gwh">50-250</div>
+                        <div class="metric-label">Implicit/ToU (GWh)</div>
+                        <div class="metric-badge illustrative">Range</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Directional & Type Breakdown - Methodology v7 -->
+            <div class="metrics-section">
+                <h3 class="section-title">Flexibility Breakdown</h3>
+                <div class="metrics-grid metrics-grid-4">
+                    <div class="metric-card has-tooltip" data-tooltip="Turn-up includes load shifting from ToU tariffs. Not new generation.">
+                        <div class="metric-value"><span id="turn-up-gw">4.6</span> GW</div>
+                        <div class="metric-label">Turn-Up (Load Increase)</div>
+                        <div class="metric-sublabel">ToU Load Shifting</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Turn-down dominated by managed demand reduction services.">
+                        <div class="metric-value"><span id="turn-down-gw">9.2</span> GW</div>
+                        <div class="metric-label">Turn-Down (Load Reduction)</div>
+                        <div class="metric-sublabel">DSR & Managed Assets</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Contracted flexibility with defined dispatch/payment mechanisms.">
+                        <div class="metric-value"><span id="explicit-gw">9.2</span> GW</div>
+                        <div class="metric-label">Explicit (Managed)</div>
+                        <div class="metric-sublabel">DSR Contracts</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Price-responsive behavioral changes from ToU tariffs.">
+                        <div class="metric-value"><span id="implicit-gw">4.6</span> GW</div>
+                        <div class="metric-label">Implicit (ToU Response)</div>
+                        <div class="metric-sublabel">Behavioral Response</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Narrative Card -->
+            <div class="narrative-card">
+                <h3>Key Findings</h3>
+                <p id="narrative-headline">Loading dashboard data...</p>
+            </div>
+
+            <!-- Asymmetry Explanation - Methodology v7 -->
+            <div class="narrative-card asymmetry-card">
+                <h3>Understanding Turn-Up vs Turn-Down</h3>
+                <p id="asymmetry-note">When Time-of-Use tariffs are included, turn-up capacity appears higher because customers shift load into off-peak periods. This reflects demand flexibility, not new generation. Managed assets are predominantly turn-down (demand reduction).</p>
+            </div>
+
+            <!-- Methodology v7 Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Turn-Up vs Turn-Down</h3>
+                    <div class="chart-container">
+                        <canvas id="directional-chart"></canvas>
+                    </div>
+                    <p class="chart-note">Turn-up dominated by ToU load shifting; turn-down by managed DSR.</p>
+                </div>
+                <div class="chart-card">
+                    <h3>Explicit vs Implicit Flexibility</h3>
+                    <div class="chart-container">
+                        <canvas id="flex-type-chart"></canvas>
+                    </div>
+                    <p class="chart-note">Explicit = contracted, Implicit = price-responsive behavior.</p>
+                </div>
+            </div>
+
+            <!-- Energy Breakdown Chart - Methodology v7 -->
+            <div class="chart-card full-width">
+                <h3>Energy Flexibility Breakdown (GWh)</h3>
+                <div class="chart-container">
+                    <canvas id="energy-breakdown-chart"></canvas>
+                </div>
+                <p class="chart-note">Energy metrics derived from contributing aggregators and ToU tariff providers.</p>
+            </div>
+
+            <!-- Market Context Card -->
+            <div class="context-card">
+                <h3>Market Context</h3>
+                <div class="context-grid">
+                    <!-- Smart EV Charging -->
+                    <div class="context-item">
+                        <div class="context-header">
+                            <span class="context-label">Smart EV Charging Coverage</span>
+                            <span class="context-source has-tooltip" data-tooltip="~1.2M battery EVs registered in UK (DfT 2024). Dashboard shows 635k smart chargers from contributing suppliers.">ⓘ</span>
+                        </div>
+                        <div class="context-stat">
+                            <span class="stat-value">635,000</span>
+                            <span class="stat-unit">smart chargers</span>
+                        </div>
+                        <p class="context-note">Represents significant penetration of the domestic smart charging market. Public chargers (~82k) are additional infrastructure.</p>
+                    </div>
+
+                    <!-- Market Growth -->
+                    <div class="context-item">
+                        <div class="context-header">
+                            <span class="context-label">Sector Growth (2024)</span>
+                            <span class="context-source has-tooltip" data-tooltip="Sources: MCS (heat pumps), GOV.UK (EV infrastructure), Energy Storage News (batteries)">ⓘ</span>
+                        </div>
+                        <div class="growth-indicators">
+                            <div class="growth-item">
+                                <span class="growth-label">Heat Pumps</span>
+                                <span class="growth-value positive">+75%</span>
+                            </div>
+                            <div class="growth-item">
+                                <span class="growth-label">EV Chargers</span>
+                                <span class="growth-value positive">+28%</span>
+                            </div>
+                            <div class="growth-item">
+                                <span class="growth-label">Grid Batteries</span>
+                                <span class="growth-value positive">+45%</span>
+                            </div>
+                        </div>
+                        <p class="context-note">Rapid market growth means this baseline will need regular updates to remain current.</p>
+                    </div>
+
+                    <!-- Data Coverage Warning -->
+                    <div class="context-item highlight">
+                        <div class="context-header">
+                            <span class="context-label">Important Caveats</span>
+                        </div>
+                        <ul class="caveat-list">
+                            <li><strong>Partial coverage:</strong> Based on a limited number of contributors; not a full-market total.</li>
+                            <li><strong>Capacity definition:</strong> MW reflects average daily coincident, deduplicated, peak deliverable capacity (Template section 3.2).</li>
+                            <li><strong>Missing MW submissions:</strong> Where MW is not provided, capacity is treated as missing rather than inferred from asset counts.</li>
+                            <li><strong>Double counting risk:</strong> Contributors were asked to use conservative values where assets overlap across markets; residual overlap may remain.</li>
+                            <li><strong>Route-to-market coverage:</strong> Benchmarks like CM do not cover DFS, many DSO tenders, BM/ancillary services, bilateral routes, or most domestic propositions.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Flexibility by Sector</h3>
+                    <div class="chart-container">
+                        <canvas id="sector-chart"></canvas>
+                    </div>
+                    <p class="chart-note" id="sector-note"></p>
+                </div>
+                <div class="chart-card">
+                    <h3>Flexibility by Asset Group</h3>
+                    <div class="chart-container">
+                        <canvas id="asset-group-chart"></canvas>
+                    </div>
+                    <p class="chart-note" id="asset-group-note">Asset classes are grouped to improve confidentiality where fewer than 3 contributors provide MW values.</p>
+                </div>
+            </div>
+
+            <div class="chart-card full-width">
+                <h3>Asset portfolio by group (counts)</h3>
+                <div class="chart-container">
+                    <canvas id="asset-group-count-chart"></canvas>
+                </div>
+                <p class="chart-note" id="asset-group-count-note">Counts reflect contributor-reported portfolio sizes (Template Part 2). Ranges are used where disclosure rules apply.</p>
+            </div>
+
+            <!-- Sector Summary Cards -->
+            <div class="sector-cards">
+                <div class="sector-card domestic">
+                    <h3>Domestic Flexibility</h3>
+                    <div class="sector-metrics">
+                        <div class="sector-metric">
+                            <span class="value" id="domestic-available">--</span>
+                            <span class="label">Available (MW)</span>
+                        </div>
+                        <div class="sector-metric has-tooltip" data-tooltip="Delivery data not yet collected for Phase 1.">
+                            <span class="value not-available" id="domestic-delivered">N/A</span>
+                            <span class="label">Delivered (MW)</span>
+                        </div>
+                    </div>
+                    <a href="#domestic" class="sector-link" data-page="domestic">View Details →</a>
+                </div>
+                <div class="sector-card ic">
+                    <h3>I&C Flexibility</h3>
+                    <div class="sector-metrics">
+                        <div class="sector-metric">
+                            <span class="value" id="ic-available">--</span>
+                            <span class="label">Available (MW)</span>
+                        </div>
+                        <div class="sector-metric has-tooltip" data-tooltip="Delivery data not yet collected for Phase 1.">
+                            <span class="value not-available" id="ic-delivered">N/A</span>
+                            <span class="label">Delivered (MW)</span>
+                        </div>
+                    </div>
+                    <a href="#ic" class="sector-link" data-page="ic">View Details →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page: Domestic -->
+        <section id="domestic" class="page">
+            <div class="page-header">
+                <h1>Domestic Flexibility</h1>
+                <p class="subtitle">Residential flexible assets</p>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card primary">
+                    <div class="metric-value" id="domestic-total-mw">--</div>
+                    <div class="metric-label">Total Capacity (MW)</div>
+                </div>
+                <div class="metric-card has-tooltip" data-tooltip="Delivery factor requires event-level dispatch data, which will be collected in future phases.">
+                    <div class="metric-value not-available" id="domestic-delivery-pct">N/A</div>
+                    <div class="metric-label">Delivery Factor</div>
+                    <div class="metric-badge unavailable-badge">Phase 2</div>
+                </div>
+            </div>
+
+            <div class="chart-card full-width">
+                <h3>Domestic Asset Breakdown</h3>
+                <div class="chart-container">
+                    <canvas id="domestic-asset-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="narrative-card">
+                <h3>About Domestic Flexibility</h3>
+                <p id="narrative-domestic">
+                    Domestic flexibility includes smart EV chargers, heat pumps, home batteries,
+                    and smart appliances in residential properties. These assets can shift their
+                    electricity consumption in response to price signals or grid needs.
+                </p>
+            </div>
+        </section>
+
+        <!-- Page: I&C -->
+        <section id="ic" class="page">
+            <div class="page-header">
+                <h1>Industrial & Commercial Flexibility</h1>
+                <p class="subtitle">Non-domestic flexible assets</p>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card primary">
+                    <div class="metric-value" id="ic-total-mw">--</div>
+                    <div class="metric-label">Total Capacity (MW)</div>
+                </div>
+                <div class="metric-card has-tooltip" data-tooltip="Delivery factor requires event-level dispatch data, which will be collected in future phases.">
+                    <div class="metric-value not-available" id="ic-delivery-pct">N/A</div>
+                    <div class="metric-label">Delivery Factor</div>
+                    <div class="metric-badge unavailable-badge">Phase 2</div>
+                </div>
+            </div>
+
+            <div class="chart-card full-width">
+                <h3>I&C Asset Breakdown</h3>
+                <div class="chart-container">
+                    <canvas id="ic-asset-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="narrative-card">
+                <h3>About I&C Flexibility</h3>
+                <p id="narrative-ic">
+                    Industrial and Commercial flexibility includes cold storage facilities,
+                    water treatment works, manufacturing processes, commercial HVAC systems,
+                    and behind-the-meter batteries at business premises.
+                </p>
+            </div>
+        </section>
+
+        <!-- Page: Benchmarks / Sense-checks -->
+        <section id="benchmarks" class="page">
+            <div class="page-header">
+                <h1>Benchmarks and sense-checks</h1>
+                <p class="subtitle">External context for interpretation (not added to totals)</p>
+                <div class="study-badge">
+                    <span class="badge-label">CM Delivery Year:</span>
+                    <span class="badge-value" id="cm-dy">2024/25</span>
+                </div>
+            </div>
+
+            <div class="notice notice-warning" id="benchmarks-nonadditivity">
+                <strong>Benchmark only.</strong>
+                Capacity Market figures are used as an external sense-check and are not added to dashboard totals.
+            </div>
+
+            <details class="info-panel" open>
+                <summary>Methods and limitations</summary>
+                <div class="info-panel-body" id="benchmarks-methods">
+                    Capacity Market values represent de-rated capacity awards for DSR CMUs in Delivery Year 2024/25.
+                    Dashboard contributor figures reflect the project study period and follow the dashboard working capacity definition.
+                    Expect differences due to definition and time-period mismatch, contributor coverage, and overlaps across services.
+                </div>
+            </details>
+
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Delta vs CM benchmark</h3>
+                    <div class="chart-container">
+                        <canvas id="benchmark-delta-chart"></canvas>
+                    </div>
+                    <p class="chart-note" id="benchmark-note">Positive delta means contributor totals exceed the CM benchmark (by category). Interpret with care.</p>
+                </div>
+                <div class="chart-card">
+                    <h3>CM benchmark by category</h3>
+                    <div class="chart-container">
+                        <canvas id="cm-benchmark-chart"></canvas>
+                    </div>
+                    <p class="chart-note">CM coverage is strongest for I&C oriented capacity; it under-represents domestic propositions.</p>
+                </div>
+            </div>
+
+            <div class="data-table-card">
+                <h3>Contributor totals vs Capacity Market (DY 2024/25)</h3>
+                <table class="data-table" id="benchmark-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Contributors (MW)</th>
+                            <th>CM benchmark (MW)</th>
+                            <th>Delta (MW)</th>
+                            <th>Delta (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="benchmark-table-body">
+                        <tr><td colspan="5">Loading...</td></tr>
+                    </tbody>
+                </table>
+                <p class="chart-note">Where disclosure rules apply to contributor totals, a range is shown in the tooltip rather than a point estimate.</p>
+            </div>
+
+            <div class="sources-card">
+                <h3>Sources</h3>
+                <ul id="benchmark-sources"></ul>
+            </div>
+        </section>
+
+        <!-- Page: Projections - Methodology v7 -->
+        <section id="projections" class="page">
+            <div class="page-header">
+                <h1>Potential & Projections</h1>
+                <p class="subtitle">Latent potential and future flexibility scenarios</p>
+            </div>
+
+            <!-- Current vs Latent vs Future Summary -->
+            <div class="metrics-section">
+                <h3 class="section-title">Flexibility Trajectory</h3>
+                <div class="metrics-grid metrics-grid-4">
+                    <div class="metric-card">
+                        <div class="metric-icon">📍</div>
+                        <div class="metric-value">13.8 GW</div>
+                        <div class="metric-label">Current Observed</div>
+                        <div class="metric-sublabel">From 6 contributors</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="Derived from public deployment data × average flex per managed asset.">
+                        <div class="metric-icon">🎯</div>
+                        <div class="metric-value" id="latent-total-gw">15.4</div>
+                        <div class="metric-label">Latent Potential (GW)</div>
+                        <div class="metric-sublabel">If all eligible assets managed</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="NESO FES 2025 and Clean Power 2030 Action Plan projections.">
+                        <div class="metric-icon">🚀</div>
+                        <div class="metric-value" id="future-2030-gw">55.2</div>
+                        <div class="metric-label">2030 Projection (GW)</div>
+                        <div class="metric-sublabel" id="future-2030-range">51-66 GW range</div>
+                    </div>
+                    <div class="metric-card has-tooltip" data-tooltip="NESO FES 2025 long-term scenario.">
+                        <div class="metric-icon">🌍</div>
+                        <div class="metric-value" id="future-2050-gw">204</div>
+                        <div class="metric-label">2050 Projection (GW)</div>
+                        <div class="metric-sublabel" id="future-2050-range">180-220 GW range</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Latent Potential Section -->
+            <div class="narrative-card">
+                <h3>Latent Potential Methodology</h3>
+                <p>Latent potential estimates the total GB flexibility if all eligible assets were actively managed. Calculated as: <strong>Average flex per managed asset × Total GB deployed assets</strong>. These are derived from public deployment data to avoid k-threshold disclosure issues.</p>
+            </div>
+
+            <div class="chart-card full-width">
+                <h3>Latent Potential by Asset Class</h3>
+                <div class="chart-container">
+                    <canvas id="latent-potential-chart"></canvas>
+                </div>
+                <p class="chart-note">Based on public deployment figures from Zapmap, MCS, DESNZ, and RenewableUK.</p>
+            </div>
+
+            <!-- Latent Potential Breakdown Table -->
+            <div class="data-table-card">
+                <h3>Latent Potential Calculations</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Asset Class</th>
+                            <th>Managed Sample</th>
+                            <th>Avg kW/Asset</th>
+                            <th>GB Deployed</th>
+                            <th>Latent (GW)</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Electric Vehicles</td>
+                            <td>635,000</td>
+                            <td>7 kW</td>
+                            <td>1.8M BEVs</td>
+                            <td><strong>12.6 GW</strong></td>
+                            <td>Zapmap, SMMT</td>
+                        </tr>
+                        <tr>
+                            <td>Heat Pumps</td>
+                            <td>80</td>
+                            <td>7 kW</td>
+                            <td>250k</td>
+                            <td><strong>1.75 GW</strong></td>
+                            <td>MCS</td>
+                        </tr>
+                        <tr>
+                            <td>Domestic Batteries</td>
+                            <td>19,540</td>
+                            <td>9.2 kW</td>
+                            <td>~50k</td>
+                            <td><strong>0.46 GW</strong></td>
+                            <td>DESNZ, MCS</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="4"><strong>Total Latent Potential</strong></td>
+                            <td><strong>~15.4 GW</strong></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Future Projections Section -->
+            <div class="narrative-card">
+                <h3>Future Projections</h3>
+                <p>Future flexibility projections are based on NESO Future Energy Scenarios 2025 and the Clean Power 2030 Action Plan. Two scenario types are presented: <strong>(a)</strong> future deployment at today's participation rates, and <strong>(b)</strong> future if expanded to full market participation.</p>
+            </div>
+
+            <div class="chart-card full-width">
+                <h3>Flexibility Potential Trajectory</h3>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="future-timeline-chart"></canvas>
+                </div>
+                <p class="chart-note">Central, high, and low scenarios based on NESO FES 2025.</p>
+            </div>
+
+            <!-- 2030 Technology Breakdown -->
+            <div class="projection-cards">
+                <div class="projection-card">
+                    <h4>2030 Flexibility by Technology</h4>
+                    <div class="projection-list">
+                        <div class="projection-item">
+                            <span class="proj-label">EV Smart Charging</span>
+                            <span class="proj-value">18 GW</span>
+                            <span class="proj-note">5.5M V2G-capable EVs</span>
+                        </div>
+                        <div class="projection-item">
+                            <span class="proj-label">Heat Pumps</span>
+                            <span class="proj-value">8 GW</span>
+                            <span class="proj-note">600k/year by 2028</span>
+                        </div>
+                        <div class="projection-item">
+                            <span class="proj-label">Battery Storage</span>
+                            <span class="proj-value">23 GW</span>
+                            <span class="proj-note">Grid + domestic</span>
+                        </div>
+                        <div class="projection-item">
+                            <span class="proj-label">I&C Flexibility</span>
+                            <span class="proj-value">6 GW</span>
+                            <span class="proj-note">Expanded DSR</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="projection-card">
+                    <h4>Policy Drivers</h4>
+                    <div class="policy-list">
+                        <div class="policy-item">
+                            <span class="policy-name">ZEV Mandate</span>
+                            <span class="policy-target">80% EV sales by 2030, 100% by 2035</span>
+                        </div>
+                        <div class="policy-item">
+                            <span class="policy-name">Heat Pump Target</span>
+                            <span class="policy-target">600k installations/year by 2028</span>
+                        </div>
+                        <div class="policy-item">
+                            <span class="policy-name">Clean Power 2030</span>
+                            <span class="policy-target">Decarbonised grid by 2030</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Sources -->
+            <div class="method-card">
+                <h3>Projection Data Sources</h3>
+                <ul class="source-list">
+                    <li><a href="https://www.neso.energy/fes" target="_blank">NESO Future Energy Scenarios 2025</a> - 55.2 GW (2030), 204 GW (2050)</li>
+                    <li><a href="https://www.gov.uk/government/publications/clean-power-2030-action-plan" target="_blank">Clean Power 2030 Action Plan</a> - 51-66 GW flexibility range</li>
+                    <li><a href="https://www.theccc.org.uk" target="_blank">CCC Seventh Carbon Budget</a> - Heat pump trajectories</li>
+                    <li><a href="https://www.gov.uk/government/publications/zev-mandate-scheme-design" target="_blank">ZEV Mandate</a> - 80% EV sales 2030</li>
+                </ul>
+            </div>
+
+            <!-- Caveats -->
+            <div class="context-item highlight">
+                <div class="context-header">
+                    <span class="context-label">Important Caveats</span>
+                </div>
+                <ul class="caveat-list">
+                    <li><strong>Latent potential:</strong> Derived from public deployment data × average impact, not contributor-specific</li>
+                    <li><strong>Future projections:</strong> Based on NESO/government scenarios, subject to policy changes</li>
+                    <li><strong>Participation rates:</strong> Actual participation may differ from modelled scenarios</li>
+                    <li><strong>Technology evolution:</strong> New technologies may change flexibility landscape</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Page: Methodology -->
+        <section id="methodology" class="page">
+            <div class="page-header">
+                <h1>Methodology & Data Coverage</h1>
+                <p class="subtitle">How this dashboard was created</p>
+            </div>
+
+            <div class="methodology-grid">
+                <div class="method-card">
+                    <h3>Data Collection</h3>
+                    <p>Data was collected from energy suppliers, aggregators, and network operators
+                    using standardised templates. Each organisation submitted information about
+                    their flexible asset portfolios and service participation.</p>
+                </div>
+
+                <div class="method-card">
+                    <h3>Data Governance</h3>
+                    <p>To protect commercial confidentiality, all data undergoes statistical
+                    disclosure control. Values are only published when 3 or more contributors
+                    exist for that metric. This prevents identification of individual organisations.</p>
+                    <div class="governance-badge">
+                        <span class="k-badge">k = 3</span>
+                        <span class="k-label">Minimum contributors per cell</span>
+                    </div>
+                </div>
+
+                <div class="method-card">
+                    <h3>Range Estimates</h3>
+                    <p>Where fewer than 3 contributors exist for a dimension, we publish
+                    <strong>range estimates</strong> instead of point values. This statistical
+                    disclosure approach (used by ONS and Eurostat) protects individual
+                    contributors while still providing useful magnitude information.</p>
+                    <div class="range-examples">
+                        <div class="range-example">
+                            <span class="range-badge">5-10 GW</span>
+                            <span>= Value falls within this range</span>
+                        </div>
+                        <div class="range-example">
+                            <span class="range-badge">50-100 MW</span>
+                            <span>= Value falls within this range</span>
+                        </div>
+                    </div>
+                    <p class="context-note" style="margin-top: 0.75rem;">Ranges are shown in orange on charts. The bar height represents the range midpoint.</p>
+                </div>
+
+                <div class="method-card">
+                    <h3>Data Quality</h3>
+                    <div id="quality-metrics">
+                        <div class="quality-row">
+                            <span class="quality-label">Contributors:</span>
+                            <span class="quality-value" id="quality-contributors">--</span>
+                        </div>
+                        <div class="quality-row">
+                            <span class="quality-label">Validation Rate:</span>
+                            <span class="quality-value" id="quality-validation">--%</span>
+                        </div>
+                        <div class="quality-row">
+                            <span class="quality-label">Avg Completeness:</span>
+                            <span class="quality-value" id="quality-completeness">--%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h3>External Data Sources</h3>
+                <p>Market context figures are drawn from publicly available sources:</p>
+                <ul class="source-list">
+                    <li><a href="https://www.gov.uk/government/publications/clean-power-2030-action-plan" target="_blank">Clean Power 2030 Action Plan</a> - DESNZ flexibility targets</li>
+                    <li><a href="https://mcscertified.com/2024-is-the-best-year-on-record-for-certified-heat-pump-installations-in-the-uk/" target="_blank">MCS Certified</a> - Heat pump installation statistics</li>
+                    <li><a href="https://www.gov.uk/government/collections/electric-vehicle-charging-infrastructure-statistics" target="_blank">GOV.UK</a> - EV charging infrastructure statistics</li>
+                    <li><a href="https://www.energy-storage.news/uk-reaches-6gw-8gwh-of-operational-bess-nearly-20gwh-under-construction/" target="_blank">Energy Storage News</a> - UK battery storage capacity</li>
+                    <li><a href="https://www.neso.energy/industry-information/balancing-services/demand-flexibility-service-dfs" target="_blank">NESO</a> - Demand Flexibility Service data</li>
+                </ul>
+            </div>
+
+            <div class="cta-card">
+                <h3>Contribute Data</h3>
+                <p>Want to contribute to future releases of this dashboard?
+                Contact the ADE Data Lab team to learn how your organisation can participate.</p>
+                <a href="mailto:data@theade.co.uk" class="cta-button">Get in Touch</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <p>© 2025 Association for Decentralised Energy</p>
+                <p class="footer-note">
+                    Last updated: <span id="last-updated">--</span>
+                </p>
+            </div>
+            <div class="footer-links">
+                <a href="https://www.theade.co.uk" target="_blank">About ADE</a>
+                <a href="#projections" data-page="projections">Projections</a>
+                <a href="#methodology" data-page="methodology">Methodology</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/charts.js"></script>
+</body>
+</html>

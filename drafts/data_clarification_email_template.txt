@@ -1,0 +1,29 @@
+﻿Subject: ADE Flex Dashboard - Data Clarification Request
+
+Dear [Contact name],
+
+Thank you for submitting your data return for the Flex Dashboard.
+
+We have processed your submission and were able to extract useful information (for example, asset counts and/or delivered and available energy over the Phase 1 study period).
+
+Clarification needed to publish capacity metrics
+To include your submission in the dashboard's MW capacity metrics, we need the capacity fields in the data template Section 3.2:
+
+- The average of your daily coincident, deduplicated, peak deliverable capacity (MW)
+- Where relevant, please provide both turn-up and turn-down values (and available vs delivered) if they differ
+
+The template definition is:
+For each day, take the maximum simultaneously deliverable capacity across all assets (after accounting for participation in multiple markets and availability factors), then average those daily values over the study period (Nov 2024 to Feb 2025).
+
+If you have these MW figures available, please either:
+1) Reply to this email with the values, or
+2) Populate Section 3.2 in the attached template and return it.
+
+Thank you again. If it would help, I can also offer a short call to align on definitions and the simplest export from your side.
+
+Best regards,
+
+[Your name]
+Flex Dashboard project team
+
+Attachment: Data Template V1.2.xlsx
