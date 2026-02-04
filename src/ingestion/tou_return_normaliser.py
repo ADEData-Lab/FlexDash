@@ -382,10 +382,17 @@ def normalise_tou_return_to_v1_2(
     notes: List[str] = []
 
     # Part 1: basic identifiers (best-effort)
-    # Use a generic label for Company name to avoid writing provider identifiers into the normalised file.
-    ws.cell(row=4, column=10).value = "Non-template TOU return (normalised)"
-    ws.cell(row=13, column=10).value = "Supplier (non-template TOU return)"
-    notes.append("Part 1: set Company name (generic label) and Company type.")
+    # Use generic labels to avoid writing provider identifiers into the normalised file.
+    company_name = "Non-template TOU return (normalised)"
+    company_type = "Supplier (non-template TOU return)"
+
+    # The V1.2 template has historically been filled in different cells by different contributors.
+    # Populate the common locations observed in real returns so downstream name extraction works.
+    for (r, c) in [(6, 2), (4, 10)]:
+        ws.cell(row=r, column=c).value = company_name
+    for (r, c) in [(16, 2), (13, 10)]:
+        ws.cell(row=r, column=c).value = company_type
+    notes.append("Part 1: set Company name and Company type (generic labels).")
 
     _write_part2_counts(ws, blocks.get("counts") or [], notes)
     _write_part4_tables(ws, blocks, notes)

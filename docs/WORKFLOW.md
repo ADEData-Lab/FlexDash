@@ -52,7 +52,8 @@ These admin outputs may include contributor-level values and must not be circula
 These are the most common causes of manual review flags and missing values in the public dashboard:
 
 - **No numeric values in Part 3.2 (MW):** the submission includes counts and/or ToU information, but provides no coincident/deduplicated MW capacity. In that case, the dashboard treats MW capacity as missing (it is not inferred from counts).
-- **ToU Part 4.2 provided but Part 4.3 missing:** ToU period totals can be used for **energy (GWh)** reporting, but without busiest-half-hour values we cannot derive **implicit MW**.
+- **ToU Part 4.2 provided but Part 4.3 missing:** ToU period totals can be used for **energy (GWh)** reporting, but without Part 4.3 busiest-half-hour **MWh** we cannot derive **implicit MW** capacity.
+- **ToU Part 4.3 MW blank/zero:** if Part 4.3 busiest-half-hour MWh is provided but the MW columns are blank or 0 (common placeholder), the pipeline derives MW automatically.
 
 ## What to check when something looks wrong
 

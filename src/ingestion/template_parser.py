@@ -100,24 +100,80 @@ class TemplateParser:
             )
             if looks_like_template:
                 contributor_name = None
+
+                def _looks_like_placeholder_label(s: str) -> bool:
+                    t = (s or "").strip().lower()
+                    return (
+                        not t
+                        or t in {"company name", "company type"}
+                        or t.startswith("company type")
+                        or t.startswith("contact")
+                        or t.startswith("email")
+                        or t.startswith("organisation")
+                        or t.startswith("example")
+                        or t.startswith("part ")
+                        or t.startswith("section ")
+                        or t.startswith("1.")
+                        or t.startswith("2.")
+                        or t.startswith("3.")
+                        or t.startswith("4.")
+                    )
+
+                def _extract_company_name_from_preview(pv: pd.DataFrame) -> Optional[str]:
+                    """
+                    Best-effort extraction of the submitted organisation name from Part 1.
+
+                    Real-world returns vary in where the name is placed. We search a window
+                    around the "Company name" label and avoid common placeholder labels.
+                    """
+                    max_rows = min(len(pv), 35)
+                    max_cols = pv.shape[1]
+
+                    for r in range(max_rows):
+                        for c in range(max_cols):
+                            v = pv.iat[r, c]
+                            if not (isinstance(v, str) and v.strip().lower() == "company name"):
+                                continue
+
+                            # Search a local window around the label. Prefer short, "name-like" strings.
+                            r0 = max(0, r - 2)
+                            r1 = min(max_rows, r + 18)
+                            c0 = max(0, c - 4)
+                            c1 = min(max_cols, c + 25)
+
+                            candidates: List[tuple[int, int, str]] = []
+                            for rr in range(r0, r1):
+                                for cc in range(c0, c1):
+                                    vv = pv.iat[rr, cc]
+                                    if not isinstance(vv, str):
+                                        continue
+                                    s = vv.strip()
+                                    if _looks_like_placeholder_label(s):
+                                        continue
+                                    # Skip likely long instruction text blocks.
+                                    if len(s) > 80 or s.count(" ") > 10 or "\n" in s:
+                                        continue
+                                    # Skip pure numeric tokens (section numbering).
+                                    if re.fullmatch(r"\d+(?:\.\d+)?", s):
+                                        continue
+                                    candidates.append((rr, cc, s))
+
+                            if not candidates:
+                                return None
+
+                            # Prefer the closest candidate, but bias slightly towards cells below the label.
+                            def _score(item: tuple[int, int, str]) -> tuple[int, int]:
+                                rr, cc, _ = item
+                                dr = rr - r
+                                dc = abs(cc - c)
+                                return (abs(dr) + dc + (0 if dr >= 0 else 3), abs(dr))
+
+                            candidates.sort(key=_score)
+                            return candidates[0][2]
+                    return None
+
                 try:
-                    # Extract company name from Part 1 (best-effort).
-                    for r in range(min(len(preview), 30)):
-                        for c in range(preview.shape[1]):
-                            v = preview.iat[r, c]
-                            if isinstance(v, str) and v.strip().lower() == "company name":
-                                for rr in range(r + 1, min(r + 15, len(preview))):
-                                    for cc in [c - 1, c, c + 1]:
-                                        if 0 <= cc < preview.shape[1]:
-                                            vv = preview.iat[rr, cc]
-                                            if isinstance(vv, str) and vv.strip():
-                                                contributor_name = vv.strip()
-                                                break
-                                    if contributor_name:
-                                        break
-                                break
-                        if contributor_name:
-                            break
+                    contributor_name = _extract_company_name_from_preview(preview)
                 except Exception:
                     contributor_name = None
 
@@ -729,14 +785,31 @@ class TemplateParser:
                 tu_mwh = parse_float(df.iat[i, mwh_tu_col] if mwh_tu_col < df.shape[1] else None)
                 td_mw = parse_float(df.iat[i, mw_td_col] if mw_td_col < df.shape[1] else None)
                 tu_mw = parse_float(df.iat[i, mw_tu_col] if mw_tu_col < df.shape[1] else None)
+
+                def _is_missing_or_zero(x: Optional[float]) -> bool:
+                    return x is None or x == 0.0
+
                 # Many template workbooks include placeholder zeros in the Part 4.3 MW columns.
-                # Treat rows with no provided MWh values and only 0 MW placeholders as "missing"
-                # so we don't accidentally (a) count a contributor as providing implicit MW or
-                # (b) publish misleading zeros in admin QA outputs.
-                if (td_mwh is None and tu_mwh is None) and (
-                    (td_mw is None or td_mw == 0.0) and (tu_mw is None or tu_mw == 0.0)
-                ):
+                # Treat rows with no meaningful values as "missing" so we don't accidentally:
+                #   (a) count a contributor as providing implicit MW, or
+                #   (b) publish misleading zeros in admin QA outputs.
+                if _is_missing_or_zero(td_mwh) and _is_missing_or_zero(tu_mwh) and _is_missing_or_zero(td_mw) and _is_missing_or_zero(tu_mw):
                     continue
+
+                # The template guidance implies that busiest-HH energy is captured as half-hour MWh and
+                # can be converted to MW by dividing by 0.5h (i.e., *2). In practice, many suppliers
+                # fill the MWh columns but leave MW columns blank or as 0 placeholders.
+                derived_from_mwh = False
+                if (td_mwh is not None and td_mwh != 0.0) and (td_mw is None or td_mw == 0.0):
+                    td_mw = abs(td_mwh) * 2.0
+                    derived_from_mwh = True
+                if (tu_mwh is not None and tu_mwh != 0.0) and (tu_mw is None or tu_mw == 0.0):
+                    tu_mw = abs(tu_mwh) * 2.0
+                    derived_from_mwh = True
+
+                cap = None
+                if td_mw is not None or tu_mw is not None:
+                    cap = max(abs(td_mw or 0.0), abs(tu_mw or 0.0))
 
                 rows_out.append(
                     {
@@ -745,8 +818,8 @@ class TemplateParser:
                         "busiest_hh_turn_up_mwh": tu_mwh,
                         "busiest_hh_turn_down_mw": td_mw,
                         "busiest_hh_turn_up_mw": tu_mw,
-                        "capacity_mw": max(td_mw or 0.0, tu_mw or 0.0) if (td_mw is not None or tu_mw is not None) else None,
-                        "capacity_basis": "tou_busiest_hh",
+                        "capacity_mw": cap,
+                        "capacity_basis": "tou_busiest_hh_derived_from_mwh" if derived_from_mwh else "tou_busiest_hh_provided_mw",
                     }
                 )
 
@@ -810,8 +883,9 @@ class TemplateParser:
 
             if totals_present and not busiest_present:
                 warnings.append(
-                    "Template V1.2: Part 4.2 ToU totals provided but Part 4.3 busiest-HH MW is missing; "
-                    "implicit capacity (MW) cannot be derived (energy totals will still be used)."
+                    "Template V1.2: Part 4.2 ToU totals provided but Part 4.3 busiest-HH values are missing; "
+                    "implicit capacity (MW) cannot be derived (energy totals will still be used). "
+                    "Populate Part 4.3 busiest-HH MWh (we convert to MW automatically)."
                 )
 
         sectors_present = set(assets_df['sector'].dropna().unique()) if not assets_df.empty and 'sector' in assets_df.columns else set()
