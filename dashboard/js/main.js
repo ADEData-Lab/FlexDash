@@ -496,6 +496,12 @@ function updateV7Metrics(data) {
         updateElement('latent-total-gw', '--');
     }
 
+    // Current observed (for projections page)
+    const currentGW = (data.metrics?.total_available_mw || 0) / 1000;
+    const contributorCount = data.metrics?.contributor_count || 0;
+    updateElement('current-observed-gw', `${currentGW.toFixed(1)} GW`);
+    updateElement('current-observed-contributors', `From ${contributorCount} contributors`);
+
     // Future projections
     if (data.future_potential) {
         updateElement('future-2030-gw', data.future_potential['2030'].central_gw);
