@@ -41,10 +41,23 @@ async function initDashboard() {
     // Load data
     await loadDashboardData();
 
-    // Initialize charts (if data loaded)
+    // Initialize UI and charts (if data loaded)
     if (DashboardState.data) {
-        initializeCharts();
-        updateUI();
+        // Update UI first - this should always work
+        try {
+            updateUI();
+            console.log('UI updated successfully');
+        } catch (uiError) {
+            console.error('Error updating UI:', uiError);
+        }
+
+        // Then initialize charts - may fail if Chart.js not loaded
+        try {
+            initializeCharts();
+            console.log('Charts initialized successfully');
+        } catch (chartError) {
+            console.error('Error initializing charts:', chartError);
+        }
     }
 
     console.log('FlexDash initialized');
