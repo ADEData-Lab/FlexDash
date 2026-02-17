@@ -198,12 +198,33 @@ async function loadDashboardData() {
             }
         }
         console.log('Dashboard data:', DashboardState.data);
+
+        // Check if this is demonstration data and show banner
+        checkDemoBanner(DashboardState.data);
     } catch (error) {
         console.warn('Could not load data, using demo data:', error.message);
         DashboardState.data = getDemoData();
+        checkDemoBanner(DashboardState.data);
     } finally {
         DashboardState.isLoading = false;
         document.body.classList.remove('loading');
+    }
+}
+
+/**
+ * Check if data is demonstration/synthetic and show banner accordingly
+ */
+function checkDemoBanner(data) {
+    const banner = document.getElementById('demo-banner');
+    if (!banner) return;
+
+    // Show banner if is_demo flag is set or if subtitle contains "DEMONSTRATION"
+    const isDemo = data?.is_demo ||
+                   data?.subtitle?.toLowerCase().includes('demonstration') ||
+                   data?.subtitle?.toLowerCase().includes('synthetic');
+
+    if (isDemo) {
+        banner.style.display = 'block';
     }
 }
 
