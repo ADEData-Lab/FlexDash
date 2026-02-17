@@ -7,7 +7,7 @@ data/processed/
 data/anonymised/
 data/audit/
 data/external/
-dashboard/data/
+# dashboard/data/ - ALLOWED on synthetic-demo branch for public demo
 reports/admin/
 
 # Keep directory structure
@@ -16,7 +16,6 @@ reports/admin/
 !data/anonymised/.gitkeep
 !data/audit/.gitkeep
 !data/external/cm/.gitkeep
-!dashboard/data/.gitkeep
 !reports/admin/.gitkeep
 
 # Python

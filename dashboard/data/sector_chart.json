@@ -1,0 +1,43 @@
+{
+  "type": "doughnut",
+  "title": "Flexibility by Sector",
+  "data": {
+    "labels": [
+      "Unknown",
+      "Domestic",
+      "Ic"
+    ],
+    "datasets": [
+      {
+        "data": [
+          16300.0,
+          NaN,
+          NaN
+        ],
+        "backgroundColor": [
+          "#2E86AB",
+          "#A23B72"
+        ],
+        "borderWidth": 2,
+        "borderColor": "#ffffff"
+      }
+    ]
+  },
+  "options": {
+    "responsive": true,
+    "plugins": {
+      "legend": {
+        "position": "bottom"
+      },
+      "title": {
+        "display": true,
+        "text": "Sector Split (MW)"
+      }
+    }
+  },
+  "illustrative_flags": [
+    false,
+    false,
+    false
+  ]
+}

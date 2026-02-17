@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-02-17T14:17:00.371707",
+  "study_period": "Nov 2024-Feb 2025",
+  "metrics": {
+    "headline": {
+      "total_available_mw": 16300,
+      "total_delivered_mw": 0.0,
+      "delivery_factor_pct": 0.0,
+      "contributor_count": 15
+    },
+    "domestic": {
+      "available_mw": 0.0,
+      "delivered_mw": 0,
+      "delivery_factor_pct": 0
+    },
+    "ic": {
+      "available_mw": 0.0,
+      "delivered_mw": 0,
+      "delivery_factor_pct": 0
+    }
+  },
+  "narratives": {
+    "headline": "This dashboard presents flexibility data from 15 contributing organisations for the study period Nov 2024-Feb 2025. Total available flexibility capacity is 16,300 MW.",
+    "sector": "Sector breakdown data is limited in this release.",
+    "delivery": "Delivery factor data is not yet available.",
+    "coverage": "Data for this dashboard was provided by 15 organisations. Where fewer than 3 contributors exist for a metric, illustrative values are shown to protect commercial confidentiality."
+  }
+}

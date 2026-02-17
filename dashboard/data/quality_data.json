@@ -1,0 +1,39 @@
+{
+  "generated_at": "2026-02-17T14:17:00.426046",
+  "quality_metrics": {
+    "total_submissions": 15,
+    "valid_submissions": 15,
+    "validation_rate": 1.0,
+    "average_completeness": 1.212,
+    "average_quality": 0.8399999999999999,
+    "total_errors": 0,
+    "total_warnings": 48,
+    "common_errors": [],
+    "common_warnings": [
+      [
+        "assets.market_share_pct: Low completeness (0.0%)",
+        8
+      ],
+      [
+        "assets.remarks: Low completeness (0.0%)",
+        8
+      ],
+      [
+        "assets.capacity_mw: Low completeness (0.0%)",
+        8
+      ],
+      [
+        "assets.portfolio_count: Low completeness (10.0%)",
+        4
+      ],
+      [
+        "assets.winter_active_count: Low completeness (10.0%)",
+        4
+      ]
+    ]
+  },
+  "thresholds": {
+    "k_anonymity": 3,
+    "minimum_completeness": 0.5
+  }
+}
