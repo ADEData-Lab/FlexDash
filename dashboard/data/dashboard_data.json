@@ -468,8 +468,8 @@
     "capacity_mw_contributors": 42,
     "delivered_mw_contributors": 38,
     "energy_mwh_contributors": 35,
-    "explicit_capacity_contributors": 28,
-    "implicit_capacity_contributors": 18,
+    "explicit_energy_contributors": 28,
+    "implicit_energy_contributors": 18,
     "k_threshold": 3
   },
   "service_breakdown": [
@@ -597,6 +597,10 @@
     }
   },
   "data_quality": {
+    "total_submissions": 42,
+    "valid_submissions": 42,
+    "validation_rate": 1.0,
+    "average_completeness": 0.87,
     "completeness": {
       "overall_pct": 87,
       "capacity_pct": 100,
