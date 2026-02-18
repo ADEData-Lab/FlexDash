@@ -1000,35 +1000,45 @@ function createEnergyBreakdownChart(data) {
     const energyData = data.energy_metrics;
     if (!energyData) return;
 
-    // Use midpoints for illustrative/range values
-    const explicitMidpoint = energyData.explicit.illustrative ?
-        (energyData.explicit.delivered_gwh_min + energyData.explicit.delivered_gwh_max) / 2 : 0;
-    const implicitMidpoint = energyData.implicit.illustrative ?
-        (energyData.implicit.delivered_gwh_min + energyData.implicit.delivered_gwh_max) / 2 : 0;
+    // Use actual values, or midpoints for illustrative/range values
+    const explicitValue = energyData.explicit.illustrative ?
+        (energyData.explicit.delivered_gwh_min + energyData.explicit.delivered_gwh_max) / 2 :
+        (energyData.explicit.delivered_gwh || 0);
+    const implicitValue = energyData.implicit.illustrative ?
+        (energyData.implicit.delivered_gwh_min + energyData.implicit.delivered_gwh_max) / 2 :
+        (energyData.implicit.delivered_gwh || 0);
 
     // Get theme colors
     const styles = getComputedStyle(document.documentElement);
     const illustrativeColor = styles.getPropertyValue('--chart-illustrative').trim() || '#eb8800';
     const successColor = styles.getPropertyValue('--color-success').trim() || '#6eb43f';
 
+    // Determine labels based on whether data is illustrative
+    const explicitLabel = energyData.explicit.illustrative ? 'Explicit [Range]' : 'Explicit';
+    const implicitLabel = energyData.implicit.illustrative ? 'Implicit [Range]' : 'Implicit';
+
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Explicit [Range]', 'Implicit [Range]', 'Total'],
+            labels: [explicitLabel, implicitLabel, 'Total'],
             datasets: [
                 {
                     label: 'Delivered (GWh)',
                     data: [
-                        explicitMidpoint,
-                        implicitMidpoint,
-                        energyData.total.delivered_gwh
+                        explicitValue,
+                        implicitValue,
+                        energyData.total.delivered_gwh || 0
                     ],
                     backgroundColor: [
-                        illustrativeColor + 'b3',  // Orange with transparency for illustrative
-                        illustrativeColor + 'b3',  // Orange with transparency for illustrative
-                        successColor + 'cc'        // Green for actual
+                        energyData.explicit.illustrative ? illustrativeColor + 'b3' : successColor + 'cc',
+                        energyData.implicit.illustrative ? illustrativeColor + 'b3' : successColor + 'cc',
+                        successColor + 'cc'
                     ],
-                    borderColor: [illustrativeColor, illustrativeColor, successColor],
+                    borderColor: [
+                        energyData.explicit.illustrative ? illustrativeColor : successColor,
+                        energyData.implicit.illustrative ? illustrativeColor : successColor,
+                        successColor
+                    ],
                     borderWidth: 2
                 }
             ]
@@ -1045,8 +1055,16 @@ function createEnergyBreakdownChart(data) {
                     callbacks: {
                         label: function(context) {
                             const idx = context.dataIndex;
-                            if (idx === 0) return `Explicit: ${energyData.explicit.delivered_gwh_range} (range)`;
-                            if (idx === 1) return `Implicit: ${energyData.implicit.delivered_gwh_range} (range)`;
+                            if (idx === 0) {
+                                return energyData.explicit.illustrative ?
+                                    `Explicit: ${energyData.explicit.delivered_gwh_range} (range)` :
+                                    `Explicit: ${context.parsed.y.toLocaleString()} GWh`;
+                            }
+                            if (idx === 1) {
+                                return energyData.implicit.illustrative ?
+                                    `Implicit: ${energyData.implicit.delivered_gwh_range} (range)` :
+                                    `Implicit: ${context.parsed.y.toLocaleString()} GWh`;
+                            }
                             return `Total: ${context.parsed.y.toLocaleString()} GWh`;
                         }
                     }
