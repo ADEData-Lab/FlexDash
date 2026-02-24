@@ -36,6 +36,10 @@ The pipeline regenerates dashboard data files under `dashboard/` and refreshes t
 - `dashboard/index.html` (UI shell; does not change when you run the pipeline)
 - `dashboard/js/data.js` (embedded data produced by the latest pipeline run)
 - `dashboard/public_dashboard_standalone.html` (single-file build for offline sharing)
+- `dashboard/public_dashboard_standalone_release_safe.html` (single-file build for steering-group sharing; safe splits only, no ranges or k-signals)
+- `dashboard/public_dashboard_standalone_steering_safe.html` (single-file build for steering-group circulation; aggregates only, no breakdowns)
+
+Use the release-safe build when you want some limited splits, and fall back to the steering-safe build when you need aggregates only.
 
 ### Admin QA outputs (strictly confidential)
 

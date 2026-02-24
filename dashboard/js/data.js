@@ -34,10 +34,10 @@ const DASHBOARD_DATA = {
   "is_demo": true,
   "subtitle": "DEMONSTRATION - Synthetic Data",
   "metrics": {
-    "total_available_mw": 4850,
-    "total_delivered_mw": 2180,
+    "total_available_mw": 1600,
+    "total_delivered_mw": 720,
     "delivery_factor_pct": 45.0,
-    "contributor_count": 42,
+    "contributor_count": 20,
     "total_available_mw_illustrative": false,
     "total_available_range": null,
     "total_available_range_min": null,
@@ -47,16 +47,16 @@ const DASHBOARD_DATA = {
     "total_delivered_range_min": null,
     "total_delivered_range_max": null,
     "domestic": {
-      "available_mw": 2420,
-      "delivered_mw": 1090,
+      "available_mw": 800,
+      "delivered_mw": 360,
       "available_mw_illustrative": false,
       "available_range": null,
       "available_range_min": null,
       "available_range_max": null
     },
     "ic": {
-      "available_mw": 2430,
-      "delivered_mw": 1090,
+      "available_mw": 800,
+      "delivered_mw": 360,
       "available_mw_illustrative": false,
       "available_range": null,
       "available_range_min": null,
@@ -66,13 +66,13 @@ const DASHBOARD_DATA = {
   "sector_breakdown": [
     {
       "sector": "domestic",
-      "capacity_mw": 2420,
-      "delivered_mw": 1090,
-      "count": 892000,
-      "k": 26,
-      "k_capacity_mw": 26,
-      "k_delivered_mw": 24,
-      "k_count": 26,
+      "capacity_mw": 800,
+      "delivered_mw": 360,
+      "count": 295000,
+      "k": 12,
+      "k_capacity_mw": 12,
+      "k_delivered_mw": 11,
+      "k_count": 12,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
       "count_illustrative": false,
@@ -80,13 +80,13 @@ const DASHBOARD_DATA = {
     },
     {
       "sector": "ic",
-      "capacity_mw": 2430,
-      "delivered_mw": 1090,
-      "count": 2850,
-      "k": 27,
-      "k_capacity_mw": 27,
-      "k_delivered_mw": 25,
-      "k_count": 27,
+      "capacity_mw": 800,
+      "delivered_mw": 360,
+      "count": 950,
+      "k": 12,
+      "k_capacity_mw": 12,
+      "k_delivered_mw": 11,
+      "k_count": 12,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
       "count_illustrative": false,
@@ -97,54 +97,9 @@ const DASHBOARD_DATA = {
     {
       "asset_class": "ev_charger",
       "sector": "domestic",
-      "capacity_mw": 890,
-      "delivered_mw": 400,
-      "count": 635000,
-      "k": 8,
-      "k_capacity_mw": 8,
-      "k_delivered_mw": 7,
-      "k_count": 8,
-      "capacity_mw_illustrative": false,
-      "capacity_range": null,
-      "count_illustrative": false,
-      "count_range": null
-    },
-    {
-      "asset_class": "heat_pump",
-      "sector": "domestic",
-      "capacity_mw": 420,
-      "delivered_mw": 190,
-      "count": 84000,
-      "k": 5,
-      "k_capacity_mw": 5,
-      "k_delivered_mw": 5,
-      "k_count": 5,
-      "capacity_mw_illustrative": false,
-      "capacity_range": null,
-      "count_illustrative": false,
-      "count_range": null
-    },
-    {
-      "asset_class": "battery_storage",
-      "sector": "domestic",
-      "capacity_mw": 380,
-      "delivered_mw": 170,
-      "count": 76000,
-      "k": 6,
-      "k_capacity_mw": 6,
-      "k_delivered_mw": 6,
-      "k_count": 6,
-      "capacity_mw_illustrative": false,
-      "capacity_range": null,
-      "count_illustrative": false,
-      "count_range": null
-    },
-    {
-      "asset_class": "storage_heater",
-      "sector": "domestic",
-      "capacity_mw": 520,
-      "delivered_mw": 230,
-      "count": 65000,
+      "capacity_mw": 295,
+      "delivered_mw": 135,
+      "count": 210000,
       "k": 4,
       "k_capacity_mw": 4,
       "k_delivered_mw": 4,
@@ -155,11 +110,56 @@ const DASHBOARD_DATA = {
       "count_range": null
     },
     {
+      "asset_class": "heat_pump",
+      "sector": "domestic",
+      "capacity_mw": 140,
+      "delivered_mw": 65,
+      "count": 28000,
+      "k": 3,
+      "k_capacity_mw": 3,
+      "k_delivered_mw": 3,
+      "k_count": 3,
+      "capacity_mw_illustrative": false,
+      "capacity_range": null,
+      "count_illustrative": false,
+      "count_range": null
+    },
+    {
+      "asset_class": "battery_storage",
+      "sector": "domestic",
+      "capacity_mw": 125,
+      "delivered_mw": 55,
+      "count": 25000,
+      "k": 3,
+      "k_capacity_mw": 3,
+      "k_delivered_mw": 3,
+      "k_count": 3,
+      "capacity_mw_illustrative": false,
+      "capacity_range": null,
+      "count_illustrative": false,
+      "count_range": null
+    },
+    {
+      "asset_class": "storage_heater",
+      "sector": "domestic",
+      "capacity_mw": 170,
+      "delivered_mw": 75,
+      "count": 21000,
+      "k": 3,
+      "k_capacity_mw": 3,
+      "k_delivered_mw": 3,
+      "k_count": 3,
+      "capacity_mw_illustrative": false,
+      "capacity_range": null,
+      "count_illustrative": false,
+      "count_range": null
+    },
+    {
       "asset_class": "smart_hot_water",
       "sector": "domestic",
-      "capacity_mw": 210,
-      "delivered_mw": 100,
-      "count": 32000,
+      "capacity_mw": 70,
+      "delivered_mw": 30,
+      "count": 11000,
       "k": 3,
       "k_capacity_mw": 3,
       "k_delivered_mw": 3,
@@ -172,13 +172,13 @@ const DASHBOARD_DATA = {
     {
       "asset_class": "cold_storage",
       "sector": "ic",
-      "capacity_mw": 480,
-      "delivered_mw": 220,
-      "count": 620,
-      "k": 5,
-      "k_capacity_mw": 5,
-      "k_delivered_mw": 5,
-      "k_count": 5,
+      "capacity_mw": 160,
+      "delivered_mw": 75,
+      "count": 205,
+      "k": 3,
+      "k_capacity_mw": 3,
+      "k_delivered_mw": 3,
+      "k_count": 3,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
       "count_illustrative": false,
@@ -187,13 +187,13 @@ const DASHBOARD_DATA = {
     {
       "asset_class": "water_treatment",
       "sector": "ic",
-      "capacity_mw": 390,
-      "delivered_mw": 175,
-      "count": 285,
-      "k": 4,
-      "k_capacity_mw": 4,
-      "k_delivered_mw": 4,
-      "k_count": 4,
+      "capacity_mw": 130,
+      "delivered_mw": 55,
+      "count": 95,
+      "k": 3,
+      "k_capacity_mw": 3,
+      "k_delivered_mw": 3,
+      "k_count": 3,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
       "count_illustrative": false,
@@ -202,13 +202,13 @@ const DASHBOARD_DATA = {
     {
       "asset_class": "manufacturing",
       "sector": "ic",
-      "capacity_mw": 560,
-      "delivered_mw": 250,
-      "count": 445,
-      "k": 6,
-      "k_capacity_mw": 6,
-      "k_delivered_mw": 6,
-      "k_count": 6,
+      "capacity_mw": 185,
+      "delivered_mw": 85,
+      "count": 150,
+      "k": 3,
+      "k_capacity_mw": 3,
+      "k_delivered_mw": 3,
+      "k_count": 3,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
       "count_illustrative": false,
@@ -217,13 +217,13 @@ const DASHBOARD_DATA = {
     {
       "asset_class": "commercial_hvac",
       "sector": "ic",
-      "capacity_mw": 340,
-      "delivered_mw": 150,
-      "count": 890,
-      "k": 4,
-      "k_capacity_mw": 4,
-      "k_delivered_mw": 4,
-      "k_count": 4,
+      "capacity_mw": 100,
+      "delivered_mw": 50,
+      "count": 295,
+      "k": 3,
+      "k_capacity_mw": 3,
+      "k_delivered_mw": 3,
+      "k_count": 3,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
       "count_illustrative": false,
@@ -232,13 +232,13 @@ const DASHBOARD_DATA = {
     {
       "asset_class": "commercial_battery",
       "sector": "ic",
-      "capacity_mw": 450,
-      "delivered_mw": 200,
-      "count": 385,
-      "k": 5,
-      "k_capacity_mw": 5,
-      "k_delivered_mw": 5,
-      "k_count": 5,
+      "capacity_mw": 150,
+      "delivered_mw": 65,
+      "count": 130,
+      "k": 3,
+      "k_capacity_mw": 3,
+      "k_delivered_mw": 3,
+      "k_count": 3,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
       "count_illustrative": false,
@@ -247,9 +247,9 @@ const DASHBOARD_DATA = {
     {
       "asset_class": "ev_fleet",
       "sector": "ic",
-      "capacity_mw": 210,
-      "delivered_mw": 95,
-      "count": 225,
+      "capacity_mw": 75,
+      "delivered_mw": 30,
+      "count": 75,
       "k": 3,
       "k_capacity_mw": 3,
       "k_delivered_mw": 3,
@@ -263,37 +263,37 @@ const DASHBOARD_DATA = {
   "asset_group_breakdown": [
     {
       "asset_group": "EV charging",
-      "capacity_mw": 1100,
-      "delivered_mw": 495,
-      "count": 635225,
-      "k": 11,
+      "capacity_mw": 370,
+      "delivered_mw": 165,
+      "count": 210075,
+      "k": 7,
       "capacity_mw_illustrative": false,
       "count_illustrative": false
     },
     {
       "asset_group": "Heat",
-      "capacity_mw": 1150,
-      "delivered_mw": 520,
-      "count": 181000,
-      "k": 12,
+      "capacity_mw": 380,
+      "delivered_mw": 170,
+      "count": 60000,
+      "k": 6,
       "capacity_mw_illustrative": false,
       "count_illustrative": false
     },
     {
       "asset_group": "Battery storage",
-      "capacity_mw": 830,
-      "delivered_mw": 370,
-      "count": 76385,
-      "k": 11,
+      "capacity_mw": 275,
+      "delivered_mw": 120,
+      "count": 25130,
+      "k": 6,
       "capacity_mw_illustrative": false,
       "count_illustrative": false
     },
     {
       "asset_group": "I&C load/process",
-      "capacity_mw": 1770,
-      "delivered_mw": 795,
-      "count": 2240,
-      "k": 19,
+      "capacity_mw": 575,
+      "delivered_mw": 265,
+      "count": 745,
+      "k": 9,
       "capacity_mw_illustrative": false,
       "count_illustrative": false
     }
@@ -302,78 +302,78 @@ const DASHBOARD_DATA = {
     {
       "sector": "domestic",
       "asset_class": "ev_charger",
-      "capacity_mw": 890,
-      "count": 635000,
-      "k": 8
-    },
-    {
-      "sector": "domestic",
-      "asset_class": "heat_pump",
-      "capacity_mw": 420,
-      "count": 84000,
-      "k": 5
-    },
-    {
-      "sector": "domestic",
-      "asset_class": "battery_storage",
-      "capacity_mw": 380,
-      "count": 76000,
-      "k": 6
-    },
-    {
-      "sector": "domestic",
-      "asset_class": "storage_heater",
-      "capacity_mw": 520,
-      "count": 65000,
+      "capacity_mw": 295,
+      "count": 210000,
       "k": 4
     },
     {
       "sector": "domestic",
+      "asset_class": "heat_pump",
+      "capacity_mw": 140,
+      "count": 28000,
+      "k": 3
+    },
+    {
+      "sector": "domestic",
+      "asset_class": "battery_storage",
+      "capacity_mw": 125,
+      "count": 25000,
+      "k": 3
+    },
+    {
+      "sector": "domestic",
+      "asset_class": "storage_heater",
+      "capacity_mw": 170,
+      "count": 21000,
+      "k": 3
+    },
+    {
+      "sector": "domestic",
       "asset_class": "smart_hot_water",
-      "capacity_mw": 210,
-      "count": 32000,
+      "capacity_mw": 70,
+      "count": 11000,
       "k": 3
     },
     {
       "sector": "ic",
       "asset_class": "cold_storage",
-      "capacity_mw": 480,
-      "count": 620,
-      "k": 5
+      "capacity_mw": 160,
+      "count": 205,
+      "k": 3
     },
     {
       "sector": "ic",
       "asset_class": "water_treatment",
-      "capacity_mw": 390,
-      "count": 285,
-      "k": 4
+      "capacity_mw": 130,
+      "count": 95,
+      "k": 3
     },
     {
       "sector": "ic",
       "asset_class": "manufacturing",
-      "capacity_mw": 560,
-      "count": 445,
-      "k": 6
+      "capacity_mw": 185,
+      "count": 150,
+      "k": 3
     },
     {
       "sector": "ic",
       "asset_class": "commercial_hvac",
-      "capacity_mw": 340,
-      "count": 890,
-      "k": 4
+      "capacity_mw": 100,
+      "count": 295,
+      "k": 3
     },
     {
       "sector": "ic",
       "asset_class": "commercial_battery",
-      "capacity_mw": 450,
-      "count": 385,
-      "k": 5
+      "capacity_mw": 150,
+      "count": 130,
+      "k": 3
     },
     {
       "sector": "ic",
       "asset_class": "ev_fleet",
-      "capacity_mw": 210,
-      "count": 225,
+      "capacity_mw": 75,
+      "count": 75,
       "k": 3
     }
   ],
@@ -381,96 +381,96 @@ const DASHBOARD_DATA = {
     {
       "sector": "domestic",
       "asset_group": "EV charging",
-      "capacity_mw": 890,
-      "count": 635000,
-      "k": 8
+      "capacity_mw": 295,
+      "count": 210000,
+      "k": 4
     },
     {
       "sector": "domestic",
       "asset_group": "Heat",
-      "capacity_mw": 1150,
-      "count": 181000,
-      "k": 12
+      "capacity_mw": 380,
+      "count": 60000,
+      "k": 6
     },
     {
       "sector": "domestic",
       "asset_group": "Battery storage",
-      "capacity_mw": 380,
-      "count": 76000,
-      "k": 6
+      "capacity_mw": 125,
+      "count": 25000,
+      "k": 3
     },
     {
       "sector": "ic",
       "asset_group": "I&C load/process",
-      "capacity_mw": 1770,
-      "count": 2240,
-      "k": 19
+      "capacity_mw": 575,
+      "count": 745,
+      "k": 9
     },
     {
       "sector": "ic",
       "asset_group": "Battery storage",
-      "capacity_mw": 450,
-      "count": 385,
-      "k": 5
+      "capacity_mw": 150,
+      "count": 130,
+      "k": 3
     },
     {
       "sector": "ic",
       "asset_group": "EV charging",
-      "capacity_mw": 210,
-      "count": 225,
+      "capacity_mw": 75,
+      "count": 75,
       "k": 3
     }
   ],
   "energy_metrics": {
     "total": {
-      "available_gwh": 2850,
-      "delivered_gwh": 1280,
-      "delivered_range": null,
-      "k": 42
-    },
-    "explicit": {
-      "available_gwh": 1920,
-      "delivered_gwh": 860,
-      "delivered_range": null,
-      "k": 28
-    },
-    "implicit": {
-      "available_gwh": 930,
+      "available_gwh": 940,
       "delivered_gwh": 420,
       "delivered_range": null,
-      "k": 18
+      "k": 20
+    },
+    "explicit": {
+      "available_gwh": 630,
+      "delivered_gwh": 285,
+      "delivered_range": null,
+      "k": 13
+    },
+    "implicit": {
+      "available_gwh": 310,
+      "delivered_gwh": 135,
+      "delivered_range": null,
+      "k": 9
     }
   },
   "directional_breakdown": {
     "turn_up": {
-      "capacity_mw": 1850,
-      "delivered_mw": 830,
+      "capacity_mw": 610,
+      "delivered_mw": 275,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
-      "k": 35
+      "k": 16
     },
     "turn_down": {
-      "capacity_mw": 3000,
-      "delivered_mw": 1350,
+      "capacity_mw": 990,
+      "delivered_mw": 445,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
-      "k": 40
+      "k": 19
     }
   },
   "flexibility_type_breakdown": {
     "explicit": {
-      "capacity_mw": 3200,
-      "delivered_mw": 1440,
+      "capacity_mw": 1055,
+      "delivered_mw": 475,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
-      "k": 28
+      "k": 13
     },
     "implicit": {
-      "capacity_mw": 1650,
-      "delivered_mw": 740,
+      "capacity_mw": 545,
+      "delivered_mw": 245,
       "capacity_mw_illustrative": false,
       "capacity_range": null,
-      "k": 18
+      "k": 9
     }
   },
   "utilisation": {
@@ -479,58 +479,58 @@ const DASHBOARD_DATA = {
     "domestic_rate_pct": 45,
     "ic_rate_pct": 45,
     "by_asset_class": {
-      "ev_charger": 45,
-      "heat_pump": 45,
-      "battery_storage": 45,
+      "ev_charger": 46,
+      "heat_pump": 46,
+      "battery_storage": 44,
       "storage_heater": 44,
-      "smart_hot_water": 48,
-      "cold_storage": 46,
-      "water_treatment": 45,
-      "manufacturing": 45,
-      "commercial_hvac": 44,
-      "commercial_battery": 44,
-      "ev_fleet": 45
+      "smart_hot_water": 43,
+      "cold_storage": 47,
+      "water_treatment": 42,
+      "manufacturing": 46,
+      "commercial_hvac": 50,
+      "commercial_battery": 43,
+      "ev_fleet": 40
     }
   },
   "coverage": {
-    "contributors_total": 42,
-    "capacity_mw_contributors": 42,
-    "delivered_mw_contributors": 38,
-    "energy_mwh_contributors": 35,
-    "explicit_energy_contributors": 28,
-    "implicit_energy_contributors": 18,
+    "contributors_total": 20,
+    "capacity_mw_contributors": 20,
+    "delivered_mw_contributors": 18,
+    "energy_mwh_contributors": 17,
+    "explicit_energy_contributors": 13,
+    "implicit_energy_contributors": 9,
     "k_threshold": 3
   },
   "service_breakdown": [
     {
       "service_type": "frequency_response",
-      "capacity_mw": 680,
-      "k": 8
+      "capacity_mw": 225,
+      "k": 4
     },
     {
       "service_type": "capacity_market",
-      "capacity_mw": 920,
-      "k": 12
-    },
-    {
-      "service_type": "balancing_mechanism",
-      "capacity_mw": 450,
+      "capacity_mw": 305,
       "k": 6
     },
     {
+      "service_type": "balancing_mechanism",
+      "capacity_mw": 150,
+      "k": 3
+    },
+    {
       "service_type": "dso_flexibility",
-      "capacity_mw": 380,
-      "k": 5
+      "capacity_mw": 125,
+      "k": 3
     },
     {
       "service_type": "tou_tariff",
-      "capacity_mw": 1650,
-      "k": 18
+      "capacity_mw": 545,
+      "k": 9
     },
     {
       "service_type": "wholesale_arbitrage",
-      "capacity_mw": 770,
-      "k": 9
+      "capacity_mw": 255,
+      "k": 5
     }
   ],
   "benchmarks": {
@@ -554,14 +554,14 @@ const DASHBOARD_DATA = {
       "source": "NESO DFS Winter 2024/25"
     },
     "comparison": {
-      "current_vs_2030_pct": 8.8,
-      "label": "Current dashboard (4.9 GW) vs 2030 target (55 GW)"
+      "current_vs_2030_pct": 2.9,
+      "label": "Current dashboard (1.6 GW) vs 2030 target (55 GW)"
     }
   },
   "narratives": {
-    "headline": "42 contributors reporting 4.9 GW of flexibility capacity across domestic and I&C sectors.",
-    "domestic": "Domestic flexibility is dominated by EV charging (890 MW) and storage heaters (520 MW), with growing contributions from heat pumps and home batteries.",
-    "ic": "I&C flexibility shows strong contributions from manufacturing (560 MW), cold storage (480 MW), and commercial batteries (450 MW).",
+    "headline": "20 contributors reporting 1.6 GW of flexibility capacity across domestic and I&C sectors.",
+    "domestic": "Domestic flexibility is dominated by EV charging (295 MW) and storage heaters (170 MW), with growing contributions from heat pumps and home batteries.",
+    "ic": "I&C flexibility shows strong contributions from manufacturing (185 MW), cold storage (160 MW), and commercial batteries (150 MW).",
     "utilisation": "Overall utilisation rate of 45% indicates significant untapped flexibility potential.",
     "growth": "Flexibility capacity is expected to grow significantly as EV adoption accelerates and heat pump installations increase."
   },
@@ -626,8 +626,8 @@ const DASHBOARD_DATA = {
     }
   },
   "data_quality": {
-    "total_submissions": 42,
-    "valid_submissions": 42,
+    "total_submissions": 20,
+    "valid_submissions": 20,
     "validation_rate": 1.0,
     "average_completeness": 0.87,
     "completeness": {
@@ -637,8 +637,8 @@ const DASHBOARD_DATA = {
       "energy_pct": 83
     },
     "coverage_notes": [
-      "42 contributors representing major aggregators, suppliers, and DSOs",
-      "Domestic sector well represented with 635k managed EV chargers",
+      "20 contributors representing major aggregators, suppliers, and DSOs",
+      "Domestic sector well represented with 210k managed EV chargers",
       "I&C coverage includes major industrial demand response providers"
     ]
   },

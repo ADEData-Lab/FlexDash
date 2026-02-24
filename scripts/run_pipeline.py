@@ -42,7 +42,11 @@ from src.export.dashboard_data import DashboardExporter
 from src.reports.admin_validation_report import generate_admin_validation_report
 from src.reports.admin_validation_dashboard import generate_admin_validation_dashboard
 from src.reports.ingestion_coverage_report import generate_ingestion_coverage_report
-from src.reports.public_dashboard_standalone import generate_public_dashboard_standalone
+from src.reports.public_dashboard_standalone import (
+    generate_public_dashboard_standalone,
+    generate_public_dashboard_standalone_steering_safe,
+    generate_public_dashboard_standalone_release_safe,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -986,6 +990,152 @@ def run_pipeline(config: dict) -> dict:
         except Exception as e:
             logger.warning(f"  Public standalone dashboard generation failed: {e}")
             results['steps']['public_standalone_dashboard'] = {
+                'success': False,
+                'error': str(e),
+            }
+
+        # Release-safe public dashboard (single-file; safe splits only; no ranges/k-signals).
+        try:
+            release_disclosure = DisclosureController(config.get('disclosure', {}))
+
+            def _release_safe_capacity_table(
+                df_slice: pd.DataFrame,
+                group_col: str,
+                label_map: dict[str, str] | None = None,
+            ) -> tuple[list[dict], set[str]]:
+                if df_slice is None or df_slice.empty:
+                    return [], set()
+                if group_col not in df_slice.columns or "contributor_id" not in df_slice.columns:
+                    return [], set()
+                if "capacity_mw" not in df_slice.columns:
+                    return [], set()
+
+                cap = pd.to_numeric(df_slice["capacity_mw"], errors="coerce")
+                working = df_slice.loc[cap.notna() & (cap > 0)].copy()
+                if working.empty:
+                    return [], set()
+                working["capacity_mw"] = pd.to_numeric(working["capacity_mw"], errors="coerce").astype(float)
+
+                rows: list[dict] = []
+                unsafe: set[str] = set()
+
+                for key, g in working.groupby(group_col):
+                    per = (
+                        g.groupby("contributor_id")["capacity_mw"]
+                        .sum()
+                        .astype(float)
+                    )
+                    raw_total = float(per.sum())
+                    contributor_ids = per.index.astype(str).tolist()
+                    contributor_values = per.tolist()
+
+                    decision = release_disclosure.check_cell(
+                        value=raw_total,
+                        contributor_ids=contributor_ids,
+                        dimension="release",
+                        dimension_value=str(key),
+                        metric="capacity_mw",
+                        contributor_values=contributor_values,
+                    )
+
+                    if decision.status != DisclosureStatus.SAFE:
+                        unsafe.add(str(key))
+                        continue
+
+                    safe_val = float(decision.final_value) if decision.final_value is not None else raw_total
+                    safe_val = round(safe_val / rounding) * rounding
+
+                    label = str(key)
+                    if label_map:
+                        label = label_map.get(label, label)
+
+                    rows.append({group_col: label, "capacity_mw": safe_val})
+
+                return rows, unsafe
+
+            # Sector split: only publish if both sectors are safe (no partial publication).
+            sector_label_map = {
+                "domestic": "Domestic",
+                "ic": "Industrial & Commercial",
+            }
+            sector_rows, sector_unsafe = _release_safe_capacity_table(
+                combined_df,
+                group_col="sector",
+                label_map=sector_label_map,
+            )
+            if sector_unsafe:
+                sector_rows = []
+
+            # Asset-group split: attempt to collapse unsafe groups into "Other" once.
+            asset_rows, asset_unsafe = _release_safe_capacity_table(
+                combined_df,
+                group_col="asset_group",
+            )
+            if asset_unsafe:
+                collapsed = combined_df.copy()
+                if "asset_group" in collapsed.columns:
+                    collapsed["asset_group_release"] = collapsed["asset_group"].astype(str).apply(
+                        lambda g: "Other" if g in asset_unsafe else g
+                    )
+                    asset_rows2, asset_unsafe2 = _release_safe_capacity_table(
+                        collapsed,
+                        group_col="asset_group_release",
+                    )
+                    if not asset_unsafe2 and asset_rows2:
+                        # Normalise output key name for the dashboard template.
+                        asset_rows = [
+                            {"asset_group": r["asset_group_release"], "capacity_mw": r["capacity_mw"]}
+                            for r in asset_rows2
+                        ]
+                    else:
+                        asset_rows = []
+                else:
+                    asset_rows = []
+
+            # Require at least 2 buckets for a meaningful split.
+            if len(sector_rows) < 2:
+                sector_rows = []
+            if len(asset_rows) < 2:
+                asset_rows = []
+
+            release_payload = {
+                "generated_at": datetime.now().isoformat(timespec="seconds"),
+                "study_period": str(config.get("project", {}).get("study_period") or "Nov 2024-Feb 2025"),
+                "headline": {
+                    "total_available_mw": (metrics.total_available_mw if not metrics.total_available_mw_illustrative else None),
+                    "contributor_count": int(metrics.contributor_count),
+                },
+                "sector_breakdown": sector_rows,
+                "asset_group_breakdown": asset_rows,
+            }
+
+            rel_out = generate_public_dashboard_standalone_release_safe(
+                project_root=project_root,
+                payload=release_payload,
+            )
+            logger.info(f"  Public dashboard (release-safe): {rel_out.standalone_path}")
+            results['steps']['public_standalone_dashboard_release_safe'] = {
+                'success': True,
+                'standalone_path': str(rel_out.standalone_path),
+            }
+        except Exception as e:
+            logger.warning(f"  Release-safe dashboard generation failed: {e}")
+            results['steps']['public_standalone_dashboard_release_safe'] = {
+                'success': False,
+                'error': str(e),
+            }
+
+        # Steering-safe public dashboard (single-file, aggregates only; no k signals/breakdowns).
+        try:
+            safe_out = generate_public_dashboard_standalone_steering_safe(project_root=project_root)
+            logger.info(f"  Public dashboard (steering-safe): {safe_out.standalone_path}")
+            results['steps']['public_standalone_dashboard_steering_safe'] = {
+                'success': True,
+                'standalone_path': str(safe_out.standalone_path),
+            }
+        except Exception as e:
+            logger.warning(f"  Steering-safe dashboard generation failed: {e}")
+            results['steps']['public_standalone_dashboard_steering_safe'] = {
                 'success': False,
                 'error': str(e),
             }

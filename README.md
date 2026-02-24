@@ -61,8 +61,15 @@ FlexDash produces two public-friendly entrypoints:
 
 - `dashboard/index.html` (multi-page dashboard; loads the latest pipeline output via `dashboard/js/data.js`)
 - `dashboard/public_dashboard_standalone.html` (single-file build for offline sharing)
+- `dashboard/public_dashboard_standalone_release_safe.html` (single-file build for steering-group sharing; safe splits only, no ranges or k-signals)
+- `dashboard/public_dashboard_standalone_steering_safe.html` (single-file build for steering-group circulation; aggregates only, no breakdowns)
 
 Open either file in a web browser. No server is required.
+
+Recommendation:
+
+- Use `dashboard/public_dashboard_standalone_release_safe.html` when you want limited disclosure-safe splits (no ranges and no per-cell coverage counts).
+- Use `dashboard/public_dashboard_standalone_steering_safe.html` when you need aggregates only.
 
 ### Updating with new returns (drop-in workflow)
 
